@@ -9,9 +9,9 @@
 
 👋 **¡Bienvenido al repositorio de Bitware!**
 
-**Bitware** es una plataforma de comercio electrónico integral diseñada para modernizar la venta de componentes tecnológicos. [cite_start]A diferencia de un e-commerce tradicional, esta solución integra **Inteligencia Artificial (IA)** y **Minería de Datos** para optimizar tanto la experiencia del usuario como la gestión administrativa[cite: 72, 73].
+**Bitware** es una plataforma de comercio electrónico integral diseñada para modernizar la venta de componentes tecnológicos. [cite_start]A diferencia de un e-commerce tradicional, esta solución integra **Inteligencia Artificial (IA)** y **Minería de Datos** para optimizar tanto la experiencia del usuario como la gestión administrativa.
 
-[cite_start]El sistema implementa una **Arquitectura Multicapa** que conecta un backend robusto en **PHP/MySQL** con microservicios de IA desarrollados en **Python (FastAPI/Flask)**, permitiendo funcionalidades avanzadas como recomendaciones personalizadas y predicción de stock[cite: 1208, 1216].
+El sistema implementa una **Arquitectura Multicapa** que conecta un backend robusto en **PHP/MySQL** con microservicios de IA desarrollados en **Python (FastAPI/Flask)**, permitiendo funcionalidades avanzadas como recomendaciones personalizadas y predicción de stock.
 
 → ¡Dale una ⭐ a este repositorio si te gusta el proyecto!
 
@@ -20,18 +20,18 @@
 ## ✨ Características Principales
 
 ### 🤖 IA y Microservicios (Python)
-* [cite_start]**Motor de Recomendaciones:** Sistema inteligente que analiza el comportamiento del usuario para sugerir productos personalizados en tiempo real[cite: 74, 256].
-* [cite_start]**Chatbot de Asistencia 24/7:** Asistente virtual basado en NLP para resolver consultas frecuentes de clientes automáticamente[cite: 74].
-* [cite_start]**Predicción de Stock:** Módulo de minería de datos que analiza el historial de ventas para predecir la demanda futura y evitar quiebres de inventario[cite: 74, 256].
+* **Motor de Recomendaciones:** Sistema inteligente que analiza el comportamiento del usuario para sugerir productos personalizados en tiempo real.
+* **Chatbot de Asistencia 24/7:** Asistente virtual basado en NLP para resolver consultas frecuentes de clientes automáticamente.
+* **Predicción de Stock:** Módulo de minería de datos que analiza el historial de ventas para predecir la demanda futura y evitar quiebres de inventario.
 
 ### 🛠️ Backend y Gestión (PHP & MySQL)
-* [cite_start]**Gestión Integral (CRUD):** Administración completa de usuarios, catálogo de productos, pedidos e inventario[cite: 82].
-* [cite_start]**Panel Administrativo:** Dashboard visual para el control de métricas clave y toma de decisiones[cite: 197].
-* [cite_start]**Arquitectura Segura:** Implementación de estándares **OWASP Top 10**, cifrado de contraseñas con **bcrypt** y seguridad HTTPS (SSL/TLS)[cite: 119, 120, 367].
+* **Gestión Integral (CRUD):** Administración completa de usuarios, catálogo de productos, pedidos e inventario.
+* **Panel Administrativo:** Dashboard visual para el control de métricas clave y toma de decisiones.
+* **Arquitectura Segura:** Implementación de estándares **OWASP Top 10**, cifrado de contraseñas con **bcrypt** y seguridad HTTPS (SSL/TLS).
 
 ### 💳 Pagos y Frontend
-* [cite_start]**Pasarela de Pagos:** Integración segura con servicios externos como **Webpay** y **PayPal** para transacciones en línea[cite: 108, 109].
-* [cite_start]**Interfaz Responsiva:** Diseño adaptable a móviles y escritorio utilizando HTML5, CSS3 y Bootstrap[cite: 85, 88].
+* **Pasarela de Pagos:** Integración segura con servicios externos como **Webpay** y **PayPal** para transacciones en línea.
+* **Interfaz Responsiva:** Diseño adaptable a móviles y escritorio utilizando HTML5, CSS3 y Bootstrap.
 
 ---
 
