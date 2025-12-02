@@ -1,0 +1,180 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    color: #333;
+}
+.main-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+/* --- Barra Lateral (Sidebar) --- */
+.sidebar {
+    flex-basis: 300px;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 40px 20px;
+    text-align: center;
+}
+.profile-picture-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px auto;
+}
+.profile-picture {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #3498db;
+}
+.sidebar h2 {
+    margin: 0;
+    font-weight: 500;
+}
+.sidebar p {
+    font-size: 0.9em;
+    color: #bdc3c7;
+}
+.back-link {
+    display: inline-block;
+    margin-top: 30px;
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 10px 15px;
+    border: 1px solid #3498db;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+.back-link:hover {
+    background-color: #3498db;
+    color: #fff;
+}
+
+/* --- Contenido Principal --- */
+.main-content {
+    flex-grow: 1;
+    padding: 40px;
+}
+.main-content h1 {
+    margin-top: 0;
+    font-weight: 500;
+    color: #2c3e50;
+}
+.card {
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-top: 25px;
+}
+.card h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    font-weight: 500;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+input[type="text"], input[type="email"], input[type="password"], input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+input:focus {
+    border-color: #3498db;
+    outline: none;
+}
+.btn {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+.btn:hover {
+    background-color: #2980b9;
+}
+.text-danger, .alert-danger { color: #e74c3c; font-size: 0.9em; }
+.alert-success {
+    padding: 15px;
+    background-color: #2ecc71;
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .main-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        flex-basis: auto;
+    }
+}
+.btn-danger {
+    background-color: #dc3545; /* Rojo de Bootstrap */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    /* Estilos para evitar que se vea como un botón de Guardar */
+    display: block; 
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-danger:hover {
+    background-color: #c82333; /* Rojo más oscuro al pasar el ratón */
+}
+
+/* Estilo para la tarjeta de peligro */
+.delete-card {
+    border: 1px solid #dc3545; /* Borde rojo */
+    background-color: #f8d7da; /* Fondo rojo claro */
+    margin-top: 40px; 
+}
+
+.delete-card h3 {
+    color: #dc3545;
+}
+
+/* Estilo para mostrar errores (si ya tienes uno, omite esto) */
+.text-danger {
+    color: #dc3545;
+    font-size: 0.85em;
+    margin-top: 4px;
+    display: block;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}

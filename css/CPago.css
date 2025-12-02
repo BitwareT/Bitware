@@ -1,0 +1,13 @@
+body { font-family: Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+.container { max-width: 600px; background-color: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center; }
+.icon { font-size: 4em; margin-bottom: 20px; }
+.success .icon { color: #28a745; }
+.failure .icon { color: #dc3545; }
+h1 { font-size: 1.8em; margin-bottom: 15px; }
+p { color: #555; line-height: 1.6; margin-bottom: 10px; }
+.order-id { font-weight: bold; color: #333; }
+.redirect-message { font-size: 0.9em; color: #888; margin-top: 30px; }
+.spinner { font-size: 1.2em; color: #007bff; margin-left: 5px; animation: spin 1.5s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+a.button-link { display: inline-block; margin-top: 20px; padding: 12px 25px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background-color 0.2s; }
+a.button-link:hover { background-color: #0056b3; }

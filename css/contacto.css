@@ -1,0 +1,269 @@
+/* Base y Tipografía */
+body {
+    /* Define la fuente, color de fondo, y centra el contenido en la página */
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa; /* Fondo gris muy claro */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* Centra el contenedor horizontalmente */
+    align-items: flex-start; /* Alinea el contenido al inicio de la ventana (arriba) */
+    min-height: 100vh;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.container {
+    /* Contenedor principal que envuelve todo el contenido de la página */
+    width: 90%;
+    max-width: 1100px;
+    margin: 0 auto;
+    background-color: #ffffff; /* Fondo blanco para el contenido principal */
+    padding: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    border-radius: 8px;
+    
+    /* Configuración para la distribución de dos columnas (Flexbox) */
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 30px; /* Espacio entre las columnas */
+}
+
+/* Estilo para el título principal: "Contáctanos" */
+.container h1 {
+    /* Se mueve h1 fuera del flujo flex para centrarlo encima de las columnas */
+    text-align: center;
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 5px;
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    order: -2; /* Fuerza a que aparezca al principio */
+}
+
+/* Estilo para el párrafo debajo del título principal */
+.container > p { 
+    text-align: center;
+    color: #6c757d;
+    font-size: 16px;
+    margin-bottom: 30px;
+    width: 100%; /* Ocupa todo el ancho */
+    order: -1; /* Aparece después del h1 */
+}
+
+/* Títulos de las secciones (Información de Contacto, Información de Horario) */
+h2 { 
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Distribución Principal: Ajuste de las columnas */
+.container-left, .container-right {
+    flex: 1; /* Permite que las columnas compartan el espacio disponible */
+    min-width: 300px; 
+}
+
+/* Columna Izquierda: Contenedor de Información y Horario */
+.container-left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 1. Caja de Información de Contacto (Arriba a la izquierda) */
+.info-container {
+    padding: 25px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background-color: #ffffff;
+}
+
+.info-container h2 {
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.info-container p {
+    /* Alinea el ícono, el texto fuerte y el contenido */
+    display: flex;
+    align-items: flex-start; /* Alinea los ítems al inicio */
+    margin-bottom: 15px;
+    font-size: 15px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.info-container p strong {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #333;
+    min-width: 70px; /* Ancho mínimo para alinear el contenido si se desea */
+}
+
+.info-container img {
+    /* Estilo para los íconos de Email, Teléfono, Dirección */
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+}
+
+/* 2. Caja de Horario de Atención (Abajo a la izquierda - Fondo Azul) */
+.info-horario {
+    background-color: #007bff; /* Color azul fuerte */
+    color: #ffffff;
+    padding: 25px;
+    border-radius: 6px;
+}
+
+.info-horario h2 {
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.info-horario p {
+    /* Distribuye el día y el horario en extremos opuestos */
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
+    font-size: 15px;
+}
+
+.info-horario p:last-child {
+    border-bottom: none;
+}
+
+.info-horario strong {
+    font-weight: normal; 
+}
+
+/* Columna Derecha: Formulario de Contacto */
+.form-container {
+    padding: 25px;
+    background-color: #ffffff;
+    border-radius: 6px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-container label {
+    display: block;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container textarea {
+    /* Estilo de los campos de entrada */
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; 
+    font-size: 15px;
+    transition: border-color 0.3s;
+}
+
+.form-container input:focus,
+.form-container textarea:focus {
+    /* Efecto al hacer click/foco en el campo */
+    border-color: #007bff;
+    outline: none;
+}
+
+.form-container textarea {
+    resize: vertical; /* Permite redimensionar solo verticalmente */
+}
+
+/* Botón de Envío del Formulario */
+.form-container button[type="submit"] {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #007bff; /* Azul primario */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+.form-container button[type="submit"]:before {
+    /* Simula el ícono de sobre o envío */
+    content: '✉'; 
+    margin-right: 10px;
+}
+
+.form-container button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Alertas de Estado (PHP) */
+.alert-success, .alert-danger {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    width: 100%; /* Asegura que la alerta ocupe todo el ancho */
+    order: 0; /* Aparecen después del h1 y p, pero antes de las columnas */
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Botón "Volver Al Inicio" (Final de la página) */
+.container > div:last-child {
+    text-align: center;
+    width: 100%; /* Ocupa todo el ancho en la parte inferior */
+    margin-top: 20px;
+    order: 4; /* Fuerza a aparecer al final */
+}
+
+.container > div:last-child button {
+    padding: 10px 20px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.container > div:last-child button:hover {
+    background-color: #5a6268;
+}
+
+/* Media Queries para responsividad (diseño móvil) */
+@media (max-width: 768px) {
+    .container {
+        /* En pantallas pequeñas, apila las columnas verticalmente */
+        flex-direction: column; 
+        padding: 20px;
+    }
+
+    .container-left, .container-right {
+        min-width: 100%;
+    }
+}

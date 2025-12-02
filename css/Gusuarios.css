@@ -1,0 +1,246 @@
+/* === ESTILOS BASE Y CONTENEDOR === */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    /* ¡Importante! Evita que el padding cause desbordes */
+    box-sizing: border-box;
+}
+
+h1, h2 {
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+h2 {
+    margin-top: 30px;
+}
+
+/* === FORMULARIO DE CREAR/EDITAR === */
+.form-container {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /* ¡Importante! Asegura que el padding no aumente el ancho */
+    box-sizing: border-box;
+}
+
+/* === BOTONES Y ALERTAS === */
+.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block; /* Para los <a> */
+}
+
+.btn-primary { background-color: #007bff; }
+.btn-success { background-color: #28a745; }
+.btn-cancel {
+    background-color: #6c757d;
+    margin-left: 10px;
+}
+.btn-cancel:hover { background-color: #5a6268; }
+.btn-primary:hover { background-color: #0056b3; }
+.btn-success:hover { background-color: #218838; }
+
+.alert-success {
+    padding: 10px;
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.alert-danger {
+    padding: 10px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.text-danger {
+    color: #dc3545;
+    font-size: 0.9em;
+}
+
+/* === FILTROS DE LA LISTA === */
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap; /* ¡Importante! Hace que los filtros se apilen si no caben */
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.filter-btn {
+    text-decoration: none;
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+    color: #333;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* === 
+    LA SOLUCIÓN PARA LA TABLA 
+=== */
+
+/* 1. Hacemos que la tabla ocupe el 100% de su contenedor y no más.
+   'table-layout: fixed' es la clave: obliga a la tabla a 
+   ajustarse al ancho, en lugar de que la tabla ajuste el ancho. */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    table-layout: fixed; /* ¡LA CLAVE N° 1! */
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    
+    /* ¡LA CLAVE N° 2! 
+       Esto fuerza al texto largo (como "Visto hace..." o los emails) 
+       a romperse y saltar de línea si no cabe en la celda. */
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+/* === ESTILOS DE FILAS Y ACCIONES === */
+.inactive-row {
+    background-color: #f8f9fa;
+    opacity: 0.6;
+}
+
+.inactive-row td {
+    text-decoration: line-through;
+}
+
+/* ¡LA CLAVE N° 3! 
+   Hacemos que los enlaces de acción sean bloques.
+   Esto los apilará verticalmente ("Editar" arriba, "Desactivar" abajo)
+   en lugar de intentar ponerlos uno al lado del otro. */
+.actions a {
+    display: block; /* Los apila verticalmente */
+    margin-bottom: 5px; /* Añade espacio entre ellos */
+    text-decoration: none;
+    font-weight: bold;
+    white-space: nowrap; /* Evita que "Desactivar" se parta en dos líneas */
+}
+
+/* Damos estilo a cada enlace de acción */
+.actions a:last-child {
+    margin-bottom: 0;
+}
+.actions a.reactivate { color: #28a745; }
+.actions a.deactivate { color: #ffc107; }
+.actions a.delete { color: #dc3545; }
+.actions a.edit { color: #007bff; }
+
+/* === (Añadir esto al final de tu Gusuarios.css) === */
+
+/* --- ESTILOS PARA BADGES DE ROL Y VIP (EN LA TABLA) --- */
+
+/* Base para todos los badges de la tabla */
+.role-badge, .vip-badge-table {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px; /* Espacio entre el icono y el texto */
+    border: 1px solid transparent;
+}
+.role-badge i, .vip-badge-table i {
+    font-size: 0.9em;
+}
+
+/* Badge de Administrador */
+.role-badge.admin-badge {
+    background-color: #fdf0f0; /* Rojo claro */
+    color: #dc3545;            /* Rojo oscuro */
+    border-color: #f5c6cb;
+}
+
+/* Badge de Vendedor */
+.role-badge.vendor-badge {
+    background-color: #fffbe6; /* Amarillo claro */
+    color: #856404;            /* Amarillo oscuro */
+    border-color: #ffeeba;
+}
+
+/* Badge de Usuario */
+.role-badge.user-badge {
+    background-color: #f8f9fa; /* Gris claro */
+    color: #495057;            /* Gris oscuro */
+    border-color: #dee2e6;
+}
+
+/* Badge de VIP Activo */
+.vip-badge-table.vip-active {
+    background-color: #e7f1ff; /* Azul claro */
+    color: #0d6efd;            /* Azul oscuro */
+    border-color: #b6d4fe;
+}
+
+/* Badges de VIP Expirado o No VIP */
+.vip-badge-table.vip-expired,
+.vip-badge-table.vip-none {
+    background-color: #f8f9fa; /* Gris claro */
+    color: #6c757d;            /* Gris oscuro */
+    border-color: #dee2e6;
+}

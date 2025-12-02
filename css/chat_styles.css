@@ -1,0 +1,191 @@
+/* --- ESTILOS GENERALES DEL CHAT --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* --- CABECERA DEL TICKET --- */
+.ticket-header {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+}
+.ticket-header h2 {
+    margin: 0 0 10px 0;
+    color: #000;
+}
+.ticket-header p {
+    margin: 4px 0 0 0;
+    color: #555;
+}
+.ticket-header p strong {
+    color: #333;
+}
+
+/* --- CONTENEDOR DE MENSAJES --- */
+.chat-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: 450px; /* Un poco más alto */
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #fdfdfd;
+    margin-bottom: 25px;
+}
+
+.chat-message {
+    padding: 12px 18px;
+    border-radius: 18px; /* Más redondeado */
+    margin-bottom: 15px;
+    max-width: 75%;
+    clear: both;
+    line-height: 1.5;
+    word-wrap: break-word; /* Asegura que palabras largas no rompan el layout */
+}
+
+.chat-message small {
+    display: block;
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+.chat-message small strong {
+    color: #333;
+}
+
+/* Mensajes del Cliente (Tú en vista cliente, Cliente en vista admin) */
+.msg-cliente {
+    background-color: #e7f1ff; /* Azul claro */
+    border: 1px solid #b8d4fe;
+    border-bottom-left-radius: 5px; /* Forma de burbuja */
+    float: left;
+    margin-right: auto; /* Alinea a la izquierda */
+}
+
+/* Mensajes del Admin (Soporte en vista cliente, Tú en vista admin) */
+.msg-admin {
+    background-color: #d4edda; /* Verde claro */
+    border: 1px solid #c3e6cb;
+    border-bottom-right-radius: 5px; /* Forma de burbuja */
+    float: right;
+    margin-left: auto; /* Alinea a la derecha */
+}
+
+/* MODIFICACIÓN: Invertir burbujas en la vista del cliente */
+body.vista-cliente .msg-cliente {
+    float: right;
+    margin-left: auto;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 5px;
+}
+body.vista-cliente .msg-admin {
+    float: left;
+    margin-right: auto;
+    border-bottom-right-radius: 18px;
+    border-bottom-left-radius: 5px;
+}
+
+/* --- FORMULARIO DE RESPUESTA --- */
+.reply-form h3 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.reply-form textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box; /* Importante */
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    caret-color: #007bff;
+}
+
+.reply-form textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,.25);
+    outline: none;
+}
+
+.reply-form button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+.reply-form button:hover {
+    background-color: #0056b3;
+}
+.reply-form button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.btn-cerrar-ticket {
+    background-color: #dc3545;
+    color: white;
+    padding: 12px 20px;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-left: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+.btn-cerrar-ticket:hover {
+    background-color: #c82333;
+}
+
+/* --- ALERTAS Y ANIMACIÓN --- */
+.alert-success {
+    color: #155724; background-color: #d4edda; padding: 15px;
+    margin-bottom: 15px; border-radius: 8px;
+}
+.alert-danger {
+    color: #721c24; background-color: #f8d7da; padding: 15px;
+    margin-bottom: 15px; border-radius: 8px;
+}
+#chat-error-msg {
+    color: red; font-size: 0.9em; margin-top: 10px; display: none;
+}
+
+.chat-message.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,218 @@
+/* --- Botón Flotante --- */
+.chatbot-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 50%;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 999;
+}
+
+/* --- Contenedor del Chat --- */
+.chat-container {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    height: 500px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    display: flex; 
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1030; /* <-- ¡SOLUCIÓN! (Más alto que la navbar 1020) */
+}
+
+/* --- Encabezado del Chat (Modificado) --- */
+.chat-header {
+    background-color: #0d6efd;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    
+    /* --- LÍNEAS NUEVAS --- */
+    display: flex;
+    justify-content: space-between; /* Título a la izq, X a la der. */
+    align-items: center;
+}
+
+/* --- NUEVO: Botón de Cerrar (X) --- */
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem; /* Grande y fácil de clickear */
+    line-height: 1;
+    padding: 0 5px;
+    cursor: pointer;
+    opacity: 0.8;
+}
+.chat-close-btn:hover {
+    opacity: 1;
+}
+
+/* --- Mensajes --- */
+.chat-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #f4f7f6; /* Fondo de los mensajes */
+}
+
+.chat-message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.4;
+}
+
+/* Mensaje del Usuario */
+.chat-message.user {
+    background-color: #0d6efd;
+    color: white;
+    align-self: flex-end; /* Alineado a la derecha */
+    border-bottom-right-radius: 4px;
+}
+
+/* Mensaje del Bot */
+.chat-message.bot {
+    background-color: #e9ecef;
+    color: #333;
+    align-self: flex-start; /* Alineado a la izquierda */
+    border-bottom-left-radius: 4px;
+}
+
+/* Indicador de "Escribiendo..." */
+.chat-message.bot.typing {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 12px 15px;
+}
+.chat-message.bot.typing span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #999;
+    animation: typing-bubble 1.2s infinite ease-in-out;
+}
+.chat-message.bot.typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-message.bot.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bubble {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* --- Respuestas Rápidas --- */
+.quick-replies-permanent {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.quick-replies-permanent button {
+    background-color: transparent;
+    border: 1px solid #0d6efd;
+    color: #0d6efd;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 15px;
+    cursor: pointer;
+}
+.quick-replies-permanent button:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* --- Input de Usuario --- */
+.chat-input {
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+.chat-input input {
+    flex-grow: 1;
+    border: none;
+    padding: 15px;
+    font-size: 1rem;
+}
+.chat-input input:focus {
+    outline: none;
+}
+.chat-input button {
+    background-color: #0d6efd;
+    border: none;
+    padding: 0 20px;
+    cursor: pointer;
+}
+
+/* ============================================= */
+/* ====== NUEVO: Estilos para Productos en Chat ===== */
+/* ============================================= */
+
+.chat-product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px; /* Espacio después del mensaje del bot */
+    align-self: flex-start; /* Alineado a la izquierda como el bot */
+    width: 100%;
+}
+
+.chat-product-card {
+    display: flex;
+    background-color: #e9ecef; /* Mismo color que el bot */
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    text-decoration: none; /* Quita subrayado del enlace */
+    color: #333; /* Color de texto */
+    width: 95%; /* Un poco más angosto que el chat */
+}
+
+.chat-product-card:hover {
+    background-color: #dfe6ec; /* Un poco más oscuro al pasar el mouse */
+}
+
+.chat-product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+    flex-shrink: 0; /* Evita que la imagen se encoja */
+}
+
+.chat-product-info {
+    flex-grow: 1;
+    overflow: hidden; /* Para que funcione el ellipsis */
+}
+
+.chat-product-info strong {
+    display: block;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Corta nombres largos */
+}
+
+.chat-product-info span {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #0d6efd; /* Color de precio */
+}

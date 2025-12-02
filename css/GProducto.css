@@ -1,0 +1,9 @@
+.galeria-existente { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 5px; }
+.galeria-item { position: relative; }
+.galeria-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
+.galeria-item a.delete-img-btn {
+    position: absolute; top: -8px; right: -8px; background: #dc3545; color: white;
+    border-radius: 50%; width: 22px; height: 22px; text-align: center;
+    line-height: 22px; text-decoration: none; font-weight: bold; font-size: 14px;
+    border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}

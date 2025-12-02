@@ -1,0 +1,207 @@
+/* ============================================= */
+/* ====== ESTILOS PARA LA PASARELA DE PAGO ======= */
+/* ============================================= */
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+.page-accent-top {
+    height: 5px;
+    background: linear-gradient(90deg, #8a2be2, #4b0082);
+}
+
+/* --- Header --- */
+.main-header {
+    background-color: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.header-inner {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.logo-webpay {
+    display: flex;
+    align-items: center;
+}
+
+.logo-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #8a2be2;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.logo-text {
+    font-weight: 700;
+    font-size: 1.5em;
+    color: #4b0082;
+}
+
+/* --- Contenedor Principal --- */
+.payment-wrapper {
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+.payment-panel {
+    display: flex;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* --- Columnas --- */
+.left-col {
+    flex: 1;
+    padding: 30px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.right-col {
+    flex: 1;
+    padding: 30px;
+}
+
+/* --- Columna Izquierda --- */
+.small-muted {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin: 0 0 5px 0;
+}
+
+.merchant-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.merchant-square {
+    width: 30px;
+    height: 30px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.amount-block .amount-value {
+    font-size: 2em;
+    font-weight: 700;
+    margin: 0;
+}
+
+.details-link {
+    font-size: 0.9em;
+    color: #007bff;
+    text-decoration: none;
+    margin: 15px 0;
+    display: inline-block;
+}
+
+.info-box {
+    display: flex;
+    gap: 10px;
+    background-color: #e7f1ff;
+    border: 1px solid #b3d7ff;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 0.85em;
+    margin: 20px 0;
+}
+.info-box i { color: #007bff; }
+
+.payment-method-title { font-weight: 500; }
+
+.payment-options { display: flex; gap: 10px; }
+.option-card {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.option-card.selected { border-color: #4b0082; border-width: 2px; }
+.option-card strong, .option-card small { display: block; }
+
+.cancel-link {
+    display: block;
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: #007bff;
+}
+
+/* --- Columna Derecha --- */
+.form-title { font-weight: 500; font-size: 1.1em; }
+
+.card-mockup {
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 25px;
+}
+.card-mockup-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.chip { width: 40px; height: 30px; background: #ccc; border-radius: 4px; }
+.card-mockup-number { font-size: 1.2em; text-align: center; letter-spacing: 2px; color: #555; margin-bottom: 10px; }
+.card-mockup-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; color: #555; }
+
+.form-row { margin-bottom: 20px; }
+.form-row label { display: block; margin-bottom: 5px; font-size: 0.9em; }
+.form-row input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #4b0082;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.accepted-cards {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+.card-badge {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 0.7em;
+}
+
+/* --- Footer --- */
+.page-footer { text-align: center; padding: 20px; font-size: 0.8em; color: #6c757d; }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .payment-panel { flex-direction: column; }
+    .left-col { border-right: none; border-bottom: 1px solid #e0e0e0; }
+}

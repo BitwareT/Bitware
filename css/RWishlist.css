@@ -1,0 +1,53 @@
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 30px; text-align: center; }
+        .wishlist-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            gap: 20px;
+        }
+        .wishlist-item:last-child { border-bottom: none; }
+        .rank {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ccc;
+            width: 50px;
+            text-align: center;
+        }
+        .rank-1 { color: #FFD700; } /* Oro */
+        .rank-2 { color: #C0C0C0; } /* Plata */
+        .rank-3 { color: #CD7F32; } /* Bronce */
+
+        .product-image img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .product-details {
+            flex-grow: 1;
+        }
+        .product-details .name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 0 0 5px 0;
+        }
+        .product-details .stock {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .wishlist-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #dc3545; /* Rojo corazón */
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }

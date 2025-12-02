@@ -1,0 +1,140 @@
+/* ============================================= */
+/* ====== ESTILOS PARA LA PÁGINA DE SERVICIOS ====== */
+/* ============================================= */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6; /* Fondo gris claro */
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+/* --- Contenedor Principal --- */
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff; /* Fondo blanco */
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+/* --- Títulos y Párrafos --- */
+h1 {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+}
+
+h2 {
+    font-size: 1.3em;
+    font-weight: 500;
+    color: #007bff; /* Azul Bitware */
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+p {
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+/* --- Formulario --- */
+.form-group {
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+select,
+textarea,
+input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Importante para que el padding no afecte el ancho total */
+    font-size: 1em;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical; /* Permite redimensionar verticalmente */
+}
+
+/* --- Botones --- */
+button[type="submit"],
+.btn-volver { /* Clase para el botón de volver */
+    display: inline-block; /* Permite dar padding y ancho */
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none; /* Para el enlace de volver */
+    transition: background-color 0.2s ease;
+}
+
+button[type="submit"] {
+    background-color: #007bff; /* Azul */
+    color: white;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.btn-volver {
+    background-color: #6c757d; /* Gris secundario */
+    color: white;
+    margin-top: 15px; /* Espacio arriba */
+}
+
+.btn-volver:hover {
+    background-color: #5a6268;
+}
+
+/* --- Mensajes de Alerta --- */
+.alert-success {
+    padding: 15px;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.alert-danger {
+    padding: 15px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* --- Enlace de Volver al Inicio (si no es un botón) --- */
+.back-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: #007bff;
+    text-decoration: underline;
+}

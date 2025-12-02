@@ -1,0 +1,16 @@
+body { font-family: Arial, sans-serif; background-color: #f4f7f6; }
+.container { max-width: 600px; margin: 40px auto; }
+.contact-form-container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.form-group { margin-bottom: 20px; }
+label { display: block; margin-bottom: 8px; font-weight: bold; }
+input[type="text"], input[type="email"], textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+textarea { resize: vertical; min-height: 120px; }
+button { width: 100%; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+.alert-success { padding: 15px; background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 20px; }
+.alert-danger { padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 5px; margin-bottom: 20px; }

@@ -1,0 +1,219 @@
+/* ============================================= */
+/* ====== ESTILOS PARA MI LISTA DE DESEADOS ====== */
+/* ============================================= */
+
+body {
+    background-color: #f4f7f6; /* Fondo gris claro consistente */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* --- Header Simple --- */
+.header {
+    padding: 15px 40px;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between; /* Alinea logo a la izq, iconos a la der */
+    align-items: center;
+}
+.header .logo a, .header .logo img { display: block; }
+.navbar-logo {
+    height: 50px;
+    aspect-ratio: 1/1;
+    border-radius: 8px;
+}
+.header-icons {
+    display: flex;
+    gap: 25px; /* Espacio entre íconos */
+    align-items: center;
+}
+.header-icons a {
+    color: #333;
+    font-size: 1.4em; /* Tamaño de los íconos */
+    position: relative; /* Para el contador del carrito */
+}
+.cart-icon .cart-count {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+
+/* --- Contenedor Principal --- */
+.wishlist-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 30px; /* Más padding interno */
+    background-color: #ffffff; /* Fondo blanco para el contenido */
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* --- Encabezado de la Página --- */
+.wishlist-header {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.wishlist-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #333;
+}
+
+.wishlist-header p {
+    color: #6c757d;
+    margin: 0;
+    font-size: 1em;
+}
+
+/* --- Grid de Productos --- */
+.productos-grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columnas por defecto */
+    gap: 25px;
+}
+
+/* --- Tarjeta de Producto (Estilos heredados de catalogo.css si existe, o definidos aquí) --- */
+.product-card-style {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex; /* Para controlar el botón de abajo */
+    flex-direction: column; /* Para ordenar elementos verticalmente */
+}
+
+.product-card-style img {
+    width: 100%;
+    height: 180px; /* Altura un poco mayor */
+    object-fit: contain; /* Cambiado a contain para ver producto completo */
+    display: block;
+    margin-bottom: 10px; /* Espacio antes de la info */
+}
+
+.product-info-wrapper {
+    padding: 0 15px; /* Padding solo horizontal */
+    text-align: center;
+    flex-grow: 1; /* Para empujar el precio y botón hacia abajo */
+}
+
+.product-name {
+    font-size: 1em; /* Un poco más grande */
+    margin: 5px 0 10px 0; /* Más espacio abajo */
+    font-weight: 500;
+    line-height: 1.3;
+    /* Control de altura y elipsis si el nombre es muy largo */
+    height: 2.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.product-pricing {
+    padding: 0 15px;
+    margin-bottom: 15px; /* Más espacio antes del botón */
+    text-align: center;
+}
+
+.product-price-new {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.add-to-cart-form {
+    padding: 0 15px;
+    margin-top: auto; /* Empuja el botón al final de la tarjeta */
+}
+
+.add-to-cart-btn {
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 0; /* Más padding vertical */
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.add-to-cart-btn i {
+    margin-right: 8px;
+}
+
+/* Oculta el botón de wishlist (corazón) en esta página */
+.wishlist-container .product-card-style .wishlist-btn {
+    display: none;
+}
+
+/* --- Mensaje de Lista Vacía --- */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+    background-color: #f8f9fa; /* Fondo suave */
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.empty-state h2 {
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.empty-state a {
+    color: #007bff;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+    .productos-grid-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .productos-grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .header { padding: 10px 20px; }
+    .wishlist-container { padding: 20px; }
+}
+
+@media (max-width: 576px) {
+    .productos-grid-container {
+        grid-template-columns: 1fr;
+    }
+    .wishlist-header h1 { font-size: 1.5em; }
+}

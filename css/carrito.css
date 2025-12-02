@@ -1,0 +1,388 @@
+/*
+==========================================================
+ESTILOS GLOBALES BASE (Asegúrate de tener esto)
+==========================================================
+*/
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f0f2f5; /* Fondo gris claro */
+    color: #333;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+h1, h2, h3 {
+    font-weight: 600;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #f0f2f5;
+    border-radius: 4px;
+    padding: 8px 15px;
+    width: 400px;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    padding-left: 10px;
+    outline: none;
+    width: 100%;
+}
+
+.search-bar i {
+    color: #888;
+}
+
+/*
+==========================================================
+1. HEADER (Barra superior) - AJUSTES PARA CARRITO
+==========================================================
+*/
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 40px;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+}
+
+.navbar-logo{
+    height: 50px;
+    aspect-ratio: 1/1;
+    border-radius: 8px; /* redondeado de imagen */
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-icons .user-icon {
+    font-size: 1.3em;
+    color: #333;
+    padding: 5px;
+}
+
+.header-icons .cart-icon {
+    position: relative;
+    font-size: 1.3em;
+    color: #333;
+    padding: 5px;
+}
+
+/* Contador de productos (círculo rojo) */
+.header-icons .cart-count {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 0.7em;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 2px 6px;
+    min-width: 12px;
+    text-align: center;
+}
+
+/*
+==========================================================
+2. CONTENIDO PRINCIPAL DEL CARRITO
+==========================================================
+*/
+.carrito-main-wrapper {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.continuar-comprando-link {
+    color: #007bff;
+    font-weight: 500;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.carrito-title {
+    font-size: 2em;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.carrito-product-count {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.carrito-grid-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr; 
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/*
+==========================================================
+3. TARJETA DE PRODUCTO INDIVIDUAL (carrito-item-card)
+==========================================================
+*/
+.productos-lista-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.carrito-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.item-info-left {
+    display: flex;
+    gap: 20px;
+    flex-grow: 1;
+}
+
+.item-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.item-specs {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.item-stock {
+    font-size: 0.9em;
+    color: #28a745; 
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Controles de Cantidad (Botones +/-) */
+.item-quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100px; 
+    overflow: hidden;
+}
+
+.qty-btn {
+    width: 30px;
+    height: 30px;
+    background-color: #f8f9fa;
+    color: #495057;
+    border: none;
+    line-height: 30px;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.qty-btn:hover {
+    background-color: #e9ecef;
+}
+
+.qty-display {
+    width: 40px;
+    text-align: center;
+    font-weight: 600;
+    color: #333;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+
+/* Lado Derecho del Item */
+.item-info-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.item-delete-btn {
+    color: #999;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    transition: color 0.2s;
+}
+
+.item-delete-btn:hover {
+    color: #dc3545;
+}
+
+.item-price-current {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.item-price-unit {
+    font-size: 0.9em;
+    color: #777;
+    margin: 0;
+}
+
+
+/*
+==========================================================
+4. RESUMEN DE COMPRA (Columna Derecha)
+==========================================================
+*/
+.resumen-compra-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.resumen-compra-card h2 {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.resumen-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.resumen-row .label {
+    color: #555;
+    font-size: 0.95em;
+}
+
+.resumen-row .value {
+    font-weight: 500;
+    color: #333;
+}
+
+.resumen-row .gratis {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.resumen-divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 15px 0;
+}
+
+.resumen-row.total {
+    padding: 15px 0;
+}
+
+.resumen-row.total .label {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.resumen-row.total .total-value {
+    font-weight: bold;
+    font-size: 1.4em;
+    color: #007bff;
+}
+
+/*
+==========================================================
+5. BOTONES DE ACCIÓN (Checkout y Continuar Comprando)
+==========================================================
+*/
+.btn-checkout {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #007bff;
+    color: white;
+    padding: 15px 0;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: 600;
+    margin-top: 20px;
+    transition: background-color 0.2s;
+}
+
+.btn-checkout:hover {
+    background-color: #0056b3;
+}
+
+.btn-continue {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: white;
+    color: #007bff;
+    padding: 15px 0;
+    text-decoration: none;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.btn-continue:hover {
+    background-color: #f0f2f5;
+}
+
+.carrito-vacio { 
+    text-align: center; 
+    padding: 40px; 
+    background-color: white; 
+    border: 1px dashed #ccc; 
+    margin-top: 40px;
+    border-radius: 8px;
+}

@@ -1,0 +1,284 @@
+/* --- Estilos para la página "Mis Pedidos" --- */
+
+/* Importar una fuente limpia (opcional, pero recomendado) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+:root {
+    --primary-blue: #007bff;
+    --light-grey: #f8f9fa;
+    --text-dark: #212529;
+    --text-light: #6c757d;
+    --white: #ffffff;
+    --border-color: #dee2e6;
+    --green: #28a745;
+    --orange: #fd7e14;
+    --yellow: #ffc107;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light-grey);
+    color: var(--text-dark);
+}
+
+/* --- Encabezado Principal --- */
+.main-header {
+    background-color: var(--primary-blue);
+    padding: 15px 0;
+    color: var(--white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.account-link {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- Contenido Principal --- */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.orders-header {
+    margin-bottom: 30px;
+}
+
+.orders-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.orders-header p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- Tarjeta de Pedido --- */
+.order-card {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.order-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.order-info {
+    flex-grow: 1;
+}
+
+.order-id-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.order-id {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.product-name {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.order-date {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.order-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.details-link {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap; /* Evita que el texto se rompa */
+    align-self: flex-end; /* Lo alinea abajo a la derecha */
+    margin-bottom: 10px;
+}
+
+/* --- Insignias de Estado --- */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge i {
+    font-size: 0.8rem;
+}
+
+.status-en-camino {
+    background-color: #e6f2ff;
+    color: #007bff;
+}
+
+.status-entregado {
+    background-color: #eaf7ed;
+    color: var(--green);
+}
+
+.status-pendiente {
+    background-color: #fff8e1;
+    color: #f57c00;
+}
+
+/* --- Estado Vacío --- */
+.empty-state {
+    text-align: center;
+    padding: 50px;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: var(--primary-blue);
+    color: var(--white);
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: 20px;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+/* Añade esto a tu css/mis_pedidos.css */
+
+.status-pagado {
+    background-color: #e6f7ff; /* Azul claro */
+    color: #1890ff;
+    border: 1px solid #91d5ff;
+}
+
+.status-cancelado {
+    background-color: #fff1f0; /* Rojo claro */
+    color: #f5222d;
+    border: 1px solid #ffa39e;
+}
+
+.status-devolucion {
+    background-color: #fffbe6; /* Amarillo claro */
+    color: #faad14;
+    border: 1px solid #ffe58f;
+}
+
+/* Puedes ajustar los estilos existentes también si lo deseas */
+.status-pendiente {
+    background-color: #fffbe6; /* Amarillo claro */
+    color: #faad14;
+    border: 1px solid #ffe58f;
+}
+.status-en-camino {
+    background-color: #e6f7ff; /* Azul claro */
+    color: #1890ff;
+    border: 1px solid #91d5ff;
+}
+.status-entregado {
+    background-color: #f6ffed; /* Verde claro */
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+}
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none; /* Oculto por defecto */
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+.modal-content {
+    background: white; padding: 25px; border-radius: 8px;
+    max-width: 500px; width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+.modal-header h2 { margin: 0; font-size: 1.5rem; }
+.modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+.modal-body .form-group { margin-bottom: 15px; }
+.modal-body label { display: block; margin-bottom: 5px; font-weight: 500; }
+.modal-body input, .modal-body select, .modal-body textarea {
+    width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;
+}
+.btn-submit-devolucion {
+    background-color: #0d6efd; color: white; border: none;
+    padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;
+}
+.order-actions {
+            margin-left: auto; /* Empuja el bloque completo a la derecha */
+            display: flex;
+            flex-direction: column; /* Apila los botones verticalmente */
+            align-items: flex-end;  /* Alinea los botones al final (derecha) */
+            gap: 8px;               /* Añade espacio entre los botones */
+            justify-content: center; /* Centra el bloque verticalmente */
+            padding: 0 10px;        /* Añade un pequeño espacio para que no se pegue al borde */
+        }
+.btn-devolucion {
+    background-color: #ffc107; color: #212529; padding: 6px 12px;
+    border-radius: 5px; text-decoration: none; font-size: 0.9em;
+    font-weight: bold; cursor: pointer; border: none;
+}
+#modal-respuesta { margin-top: 15px; font-weight: bold; }

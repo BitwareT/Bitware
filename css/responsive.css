@@ -1,0 +1,251 @@
+/* =====================================================
+   responsive.css — versión completa
+   (Con la corrección del Header aplicada)
+   ===================================================== */
+
+/* === SECCIÓN GLOBAL === */
+@media (max-width: 1024px) {
+  body {
+    font-size: 15px;
+    margin: 0;
+    padding: 0;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  .container, .dashboard-container, .main-content, .checkout-wrapper {
+    padding: 15px;
+    width: 100%;
+  }
+}
+
+/* === FRONTEND (Home, Catálogo, Carrito, Checkout, Contacto, Soporte) === */
+@media (max-width: 768px) {
+  .main-content, .checkout-wrapper, .carrito-grid-container,
+  .catalogo-grid, .productos-grid-container, .container {
+    display: flex;
+    flex-direction: column !important;
+    gap: 20px;
+  }
+
+  .sidebar, .filter-section {
+    width: 100%;
+    margin: 0;
+  }
+
+  .carrito-item-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .item-image {
+    width: 80%;
+    max-width: 200px;
+    height: auto;
+  }
+
+  /* ============================================= */
+  /* --- ¡INICIO DE LA CORRECCIÓN! --- */
+  /* (El bloque .header, .footer original fue eliminado) */
+
+  /* REGLA MEJORADA PARA EL HEADER EN MÓVIL */
+  .header {
+    /* Permite que los elementos bajen a la siguiente línea si no caben */
+    flex-wrap: wrap; 
+    
+    /* Mantiene el logo a la izq. y los iconos a la der. */
+    justify-content: space-between; 
+    
+    padding: 10px 15px; /* Menos padding en móvil */
+    gap: 10px; /* Espacio entre elementos */
+  }
+
+  .header .search-bar {
+    /* Hace que la barra de búsqueda ocupe todo el ancho */
+    order: 3; /* La pone al final (debajo del logo e iconos) */
+    width: 100%;
+  }
+  
+  .header .logo {
+    order: 1; /* Pone el logo primero (izquierda) */
+  }
+
+  .header .header-icons {
+    order: 2; /* Pone los iconos después del logo (derecha) */
+  }
+
+  /* REGLA SEPARADA PARA EL FOOTER (El original estaba bien) */
+  .footer {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  /* --- ¡FIN DE LA CORRECCIÓN! --- */
+  /* ============================================= */
+
+
+  .contact-form-container, .support-container, .soporte-container {
+    width: 100%;
+    padding: 20px;
+  }
+
+  button, .btn, .btn-primary, .btn-checkout {
+    width: 100%;
+    font-size: 1rem;
+  }
+}
+
+/* === USUARIOS (Login, Registro, Perfil, Mis pedidos, Deseados, Verificación) === */
+@media (max-width: 768px) {
+  .login-container, .register-container, .perfil-container,
+  .mis-pedidos-container, .wishlist-container, .verificar-container {
+    width: 100%;
+    padding: 20px;
+    box-shadow: none;
+  }
+
+  .input-group, .form-group {
+    width: 100%;
+  }
+
+  .user-info, .user-data {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* === ADMIN (Dashboard, Productos, Inventario, Reportes, Pedidos, Usuarios, Solicitudes) === */
+@media (max-width: 1024px) {
+  .dashboard-grid, .kpi-grid-5, .admin-table-container {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid, .kpi-grid-5, .admin-panels, .admin-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .admin-container, .inventory-container, .report-container {
+    padding: 15px;
+  }
+
+  .sidebar, .menu-admin {
+    width: 100%;
+    position: relative;
+  }
+}
+
+/* === CHATBOT Y COMPONENTES FLOTANTES === */
+@media (max-width: 480px) {
+  .chat-container, .chatbot-box {
+    width: 100%;
+    height: 80vh;
+    bottom: 0;
+    right: 0;
+    border-radius: 0;
+  }
+
+  .chatbot-btn {
+    bottom: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+}
+
+/* === MÓVILES PEQUEÑOS (≤480px) === */
+@media (max-width: 480px) {
+  h1, h2, h3 {
+    font-size: 1.3rem;
+  }
+
+  p, label, input, textarea {
+    font-size: 0.95rem;
+  }
+
+  .card, .item, .producto-card, .kpi-card {
+    margin: 10px 0;
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+/* === CATÁLOGO DE PRODUCTOS === */
+@media (max-width: 1024px) {
+  .main-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .sidebar {
+    width: 100%;
+    order: 2;
+    margin-top: 25px;
+  }
+
+  .product-catalogue-main {
+    width: 100%;
+    order: 1;
+  }
+
+  .productos-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content-wrapper {
+    padding: 10px;
+  }
+
+  .catalogue-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .productos-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .product-card-style img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .productos-grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .product-card-style {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .sidebar {
+    margin-top: 20px;
+  }
+}

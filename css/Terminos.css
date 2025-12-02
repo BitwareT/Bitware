@@ -1,0 +1,16 @@
+.legal-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    line-height: 1.7;
+    background-color: #ffffff;
+    border: 1px solid #e9e9e9;
+    border-radius: 8px;
+    color: #333;
+}
+.legal-container h1, .legal-container h2 {
+    color: #1a1a1a;
+}
+.legal-container a {
+    color: #007bff;
+}
