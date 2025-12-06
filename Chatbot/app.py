@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
@@ -7,6 +8,9 @@ from datetime import datetime
 import os
 import uuid
 import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.chart import BarChart, PieChart, LineChart, Reference
+from openpyxl.styles import Font, PatternFill
 
 # --- NUEVAS IMPORTACIONES PARA ARREGLAR ERRORES Y WARNINGS ---
 from sqlalchemy import create_engine
@@ -17,18 +21,20 @@ import warnings
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
+app.json.ensure_ascii = False
+app.config['JSON_AS_ASCII'] = False
 
-# --- CONFIGURACIÓN DE DIRECTORIOS ---
+# --- CONFIGURACIíN DE DIRECTORIOS ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 EXPORT_DIR = os.path.join(BASE_DIR, 'static', 'exports')
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
-# --- CONEXIÓN SQLALCHEMY (CORRIGE ERROR DE PANDAS) ---
+# --- CONEXIíN SQLALCHEMY (CORRIGE ERROR DE PANDAS) ---
 # Usaremos esto solo cuando usemos pandas (Predicciones y Excel)
 DB_CONNECTION_STR = 'mysql+pymysql://bitware_user:Rocky25..@localhost/bitware'
 db_engine = create_engine(DB_CONNECTION_STR)
 
-# --- CONEXIÓN CLÁSICA (Para el resto del sistema) ---
+# --- CONEXIíN CLíSICA (Para el resto del sistema) ---
 def conectar_db():
     try:
         return mysql.connector.connect(host="localhost", user="bitware_user", password="Rocky25..", database="bitware")
@@ -51,20 +57,20 @@ soportes_frases = ["soporte", "ayuda", "problema técnico", "mi pc no prende", "
 funciones_frases = ["funciones", "qué puedes hacer", "qué haces", "cuáles son tus funciones", "menú de opciones"]
 busqueda_frases = ["busca", "búscame", "encuentra", "tienes", "precio de", "cotiza", "buscar producto", "quiero buscar"]
 devolucion_frases = ["devolucion", "quiero devolver", "iniciar una devolución", "mi producto llegó dañado", "devolver pedido"]
-notificacion_stock_frases = ["avísame cuando llegue", "notifícame del stock", "cuando vuelve a estar disponible"]
+notificacion_stock_frases = ["aví­same cuando llegue", "notifí­came del stock", "cuando vuelve a estar disponible"]
 comparar_frases = [
     "compara", "cuál es mejor", "diferencia entre", 
     "compara a con b", "comparar", "comparativa", "vs",
     "compara este producto con este otro"
 ]
-actualizar_direccion_frases = ["actualizar mi dirección", "cambiar dirección de envío", "modificar dirección"]
+actualizar_direccion_frases = ["actualizar mi dirección", "cambiar dirección de enví­o", "modificar dirección"]
 
 # --- Intenciones de Administrador ---
-stats_admin_frases = ["estadísticas", "stats", "resumen", "reporte", "cómo van las ventas", "total usuarios", "reporte de ventas hoy"]
+stats_admin_frases = ["estadí­sticas", "stats", "resumen", "reporte", "cómo van las ventas", "total usuarios", "reporte de ventas hoy"]
 stock_admin_frases = ["stock de", "cuánto stock queda de", "inventario de", "revisar stock", "consultar stock"]
 buscar_cliente_frases = ["busca al cliente", "datos de cliente", "info de", "quién es el cliente", "encuentra a", "cliente"]
 cambiar_estado_pedido_frases = ["cambia el estado del pedido", "actualiza el pedido", "marcar como enviado"]
-analisis_frases = ["análisis", "analisis", "análisis de crecimiento", "qué categoría vende más", "clientes inactivos"]
+analisis_frases = ["análisis", "analisis", "análisis de crecimiento", "qué categorí­a vende más", "clientes inactivos"]
 prediccion_frases = ["predice el stock", "predicción de", "pronostica", "cuánto se venderá de", "demanda de", "predecir stock"]
 
 # ---- Intenciones Invitados ----
@@ -152,11 +158,299 @@ def buscar_productos_por_nombre(termino_busqueda):
         if conn and conn.is_connected():
             conn.close()
 
-# --- NUEVA FUNCIÓN: EXCEL (USANDO SQLALCHEMY) ---
+# --- NUEVA FUNCIíN: EXCEL (USANDO SQLALCHEMY) ---
 def generar_excel_ventas(id_vendedor, base_url, es_admin=False):
     try:
+        # --- 1. CONSULTA SQL ---
         if es_admin:
-            # Query GLOBAL: Trae ventas de TODOS los vendedores
+            query = """
+                SELECT 
+                    DATE(p.fecha_pedido) AS 'Fecha',
+                    p.id_pedido AS 'ID Pedido',
+                    pr.nombre AS 'Producto',
+                    pr.categoria AS 'Categoria', 
+                    pp.cantidad AS 'Cantidad',
+                    pp.precio_unitario AS 'Precio Unitario',
+                    (pp.cantidad * pp.precio_unitario) AS 'Total Venta',
+                    p.estado AS 'Estado Pedido',
+                    u.nombre AS 'Cliente',
+                    u.email AS 'Email Cliente',
+                    u.region AS 'Region',
+                    pr.id_vendedor AS 'ID Vendedor'
+                FROM pedidos_productos pp
+                JOIN pedidos p ON pp.id_pedido = p.id_pedido
+                JOIN producto pr ON pp.id_producto = pr.id_producto
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE p.estado IN ('Pagado', 'Enviado', 'Entregado')
+                ORDER BY p.fecha_pedido DESC
+            """
+            params = None
+        else:
+            query = """
+                SELECT 
+                    DATE(p.fecha_pedido) AS 'Fecha',
+                    p.id_pedido AS 'ID Pedido',
+                    pr.nombre AS 'Producto',
+                    pr.categoria AS 'Categoria',
+                    pp.cantidad AS 'Cantidad',
+                    pp.precio_unitario AS 'Precio Unitario',
+                    (pp.cantidad * pp.precio_unitario) AS 'Total Venta',
+                    p.estado AS 'Estado Pedido',
+                    u.nombre AS 'Cliente',
+                    u.email AS 'Email Cliente',
+                    u.region AS 'Region'
+                FROM pedidos_productos pp
+                JOIN pedidos p ON pp.id_pedido = p.id_pedido
+                JOIN producto pr ON pp.id_producto = pr.id_producto
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE pr.id_vendedor = %s
+                  AND p.estado IN ('Pagado', 'Enviado', 'Entregado')
+                ORDER BY p.fecha_pedido DESC
+            """
+            params = (id_vendedor,)
+
+        # --- 2. PROCESAR DATOS ---
+        df = pd.read_sql(query, db_engine, params=params)
+        if df.empty: return "empty"
+
+        fecha_hora = datetime.now().strftime("%Y-%m-%d_%H-%M")
+        prefix = "Reporte_Global" if es_admin else f"Ventas_Vendedor_{id_vendedor}"
+        filename = f"{prefix}_{fecha_hora}.xlsx"
+        filepath = os.path.join(EXPORT_DIR, filename)
+
+        # --- 3. CREAR TABLAS RESUMEN ---
+        # Tabla A: Productos (Columna A=1, B=2)
+        res_prod = df.groupby('Producto')[['Total Venta']].sum().sort_values('Total Venta', ascending=False).reset_index()
+        # Tabla B: Categorías (Columna D=4, E=5)
+        res_cat = df.groupby('Categoria')[['Total Venta']].sum().reset_index()
+        # Tabla C: Regiones (Columna G=7, H=8)
+        res_reg = df.groupby('Region')[['Total Venta']].sum().sort_values('Total Venta', ascending=False).head(10).reset_index()
+        # Tabla D: Fechas (Columna J=10, K=11)
+        res_date = df.groupby('Fecha')[['Total Venta']].sum().reset_index()
+
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Detalle', index=False)
+            
+            # Ubicamos las tablas separadas por una columna vacía
+            res_prod.to_excel(writer, sheet_name='Dashboard', startcol=0, index=False)  # Cols A, B
+            res_cat.to_excel(writer, sheet_name='Dashboard', startcol=3, index=False)   # Cols D, E
+            res_reg.to_excel(writer, sheet_name='Dashboard', startcol=6, index=False)   # Cols G, H
+            res_date.to_excel(writer, sheet_name='Dashboard', startcol=9, index=False)  # Cols J, K
+
+        # --- 4. GENERAR GRÁFICOS (CORREGIDO) ---
+        wb = load_workbook(filepath)
+        ws = wb['Dashboard']
+        
+        # --- GRÁFICO 1: BARRAS (Productos) ---
+        # Datos en Columna 2 (B)
+        chart1 = BarChart()
+        chart1.type = "col"
+        chart1.style = 10
+        chart1.title = "Top Productos (Ingresos)"
+        chart1.y_axis.title = "$"
+        chart1.x_axis.title = "Producto"
+        
+        filas_prod = len(res_prod) + 1
+        data1 = Reference(ws, min_col=2, min_row=1, max_row=filas_prod, max_col=2)
+        cats1 = Reference(ws, min_col=1, min_row=2, max_row=filas_prod)
+        chart1.add_data(data1, titles_from_data=True)
+        chart1.set_categories(cats1)
+        chart1.width = 18
+        chart1.height = 10
+        ws.add_chart(chart1, "A20") 
+
+        # --- GRÁFICO 2: TORTA (Categorías) ---
+        # CORRECCIÓN: Datos en Columna 5 (E), Categorías en 4 (D)
+        chart2 = PieChart()
+        chart2.title = "Ventas por Categoría"
+        
+        filas_cat = len(res_cat) + 1
+        data2 = Reference(ws, min_col=5, min_row=1, max_row=filas_cat, max_col=5) # <--- CORREGIDO (Era 4)
+        cats2 = Reference(ws, min_col=4, min_row=2, max_row=filas_cat) # <--- CORREGIDO (Era 3)
+        chart2.add_data(data2, titles_from_data=True)
+        chart2.set_categories(cats2)
+        ws.add_chart(chart2, "F20") 
+
+        # --- GRÁFICO 3: TORTA (Regiones) ---
+        # CORRECCIÓN: Datos en Columna 8 (H), Categorías en 7 (G)
+        chart3 = PieChart()
+        chart3.title = "Ventas por Región"
+        
+        filas_reg = len(res_reg) + 1
+        data3 = Reference(ws, min_col=8, min_row=1, max_row=filas_reg, max_col=8) # <--- CORREGIDO (Era 7)
+        cats3 = Reference(ws, min_col=7, min_row=2, max_row=filas_reg) # <--- CORREGIDO (Era 6)
+        chart3.add_data(data3, titles_from_data=True)
+        chart3.set_categories(cats3)
+        ws.add_chart(chart3, "K20")
+
+        # --- GRÁFICO 4: LÍNEA (Tendencia) ---
+        # CORRECCIÓN: Datos en Columna 11 (K), Categorías en 10 (J)
+        chart4 = LineChart()
+        chart4.title = "Tendencia de Ventas (Diaria)"
+        chart4.style = 12
+        chart4.y_axis.title = "$"
+        chart4.x_axis.title = "Fecha"
+        
+        filas_date = len(res_date) + 1
+        data4 = Reference(ws, min_col=11, min_row=1, max_row=filas_date, max_col=11) # <--- CORREGIDO (Era 10)
+        cats4 = Reference(ws, min_col=10, min_row=2, max_row=filas_date) # <--- CORREGIDO (Era 9)
+        chart4.add_data(data4, titles_from_data=True)
+        chart4.set_categories(cats4)
+        chart4.width = 30
+        chart4.height = 10
+        ws.add_chart(chart4, "A40")
+
+        wb.save(filepath)
+        return f"{base_url}static/exports/{filename}"
+
+    except Exception as e:
+        print(f"Error generando Excel Dashboard: {e}")
+        return None
+    try:
+        # --- 1. CONSULTA SQL (Agregamos 'pr.categoria' para el nuevo gráfico) ---
+        if es_admin:
+            query = """
+                SELECT 
+                    DATE(p.fecha_pedido) AS 'Fecha',
+                    p.id_pedido AS 'ID Pedido',
+                    pr.nombre AS 'Producto',
+                    pr.categoria AS 'Categoria', 
+                    pp.cantidad AS 'Cantidad',
+                    pp.precio_unitario AS 'Precio Unitario',
+                    (pp.cantidad * pp.precio_unitario) AS 'Total Venta',
+                    p.estado AS 'Estado Pedido',
+                    u.nombre AS 'Cliente',
+                    u.email AS 'Email Cliente',
+                    u.region AS 'Region',
+                    pr.id_vendedor AS 'ID Vendedor'
+                FROM pedidos_productos pp
+                JOIN pedidos p ON pp.id_pedido = p.id_pedido
+                JOIN producto pr ON pp.id_producto = pr.id_producto
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE p.estado IN ('Pagado', 'Enviado', 'Entregado')
+                ORDER BY p.fecha_pedido DESC
+            """
+            params = None
+        else:
+            query = """
+                SELECT 
+                    DATE(p.fecha_pedido) AS 'Fecha',
+                    p.id_pedido AS 'ID Pedido',
+                    pr.nombre AS 'Producto',
+                    pr.categoria AS 'Categoria',
+                    pp.cantidad AS 'Cantidad',
+                    pp.precio_unitario AS 'Precio Unitario',
+                    (pp.cantidad * pp.precio_unitario) AS 'Total Venta',
+                    p.estado AS 'Estado Pedido',
+                    u.nombre AS 'Cliente',
+                    u.email AS 'Email Cliente',
+                    u.region AS 'Region'
+                FROM pedidos_productos pp
+                JOIN pedidos p ON pp.id_pedido = p.id_pedido
+                JOIN producto pr ON pp.id_producto = pr.id_producto
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE pr.id_vendedor = %s
+                  AND p.estado IN ('Pagado', 'Enviado', 'Entregado')
+                ORDER BY p.fecha_pedido DESC
+            """
+            params = (id_vendedor,)
+
+        # --- 2. PROCESAR DATOS ---
+        df = pd.read_sql(query, db_engine, params=params)
+        if df.empty: return "empty"
+
+        fecha_hora = datetime.now().strftime("%Y-%m-%d_%H-%M")
+        prefix = "Reporte_Global" if es_admin else f"Ventas_Vendedor_{id_vendedor}"
+        filename = f"{prefix}_{fecha_hora}.xlsx"
+        filepath = os.path.join(EXPORT_DIR, filename)
+
+        # --- 3. CREAR TABLAS RESUMEN PARA LOS GRÁFICOS ---
+        # A. Por Producto
+        res_prod = df.groupby('Producto')[['Total Venta']].sum().sort_values('Total Venta', ascending=False).reset_index()
+        # B. Por Categoría
+        res_cat = df.groupby('Categoria')[['Total Venta']].sum().reset_index()
+        # C. Por Región (Top 10 para no saturar)
+        res_reg = df.groupby('Region')[['Total Venta']].sum().sort_values('Total Venta', ascending=False).head(10).reset_index()
+        # D. Por Fecha (Tendencia)
+        res_date = df.groupby('Fecha')[['Total Venta']].sum().reset_index()
+
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Detalle', index=False)
+            
+            # Guardamos las tablas en la hoja Dashboard en diferentes columnas
+            res_prod.to_excel(writer, sheet_name='Dashboard', startcol=0, index=False)  # Col A
+            res_cat.to_excel(writer, sheet_name='Dashboard', startcol=3, index=False)   # Col D
+            res_reg.to_excel(writer, sheet_name='Dashboard', startcol=6, index=False)   # Col G
+            res_date.to_excel(writer, sheet_name='Dashboard', startcol=9, index=False)  # Col J
+
+        # --- 4. GENERAR GRÁFICOS CON OPENPYXL ---
+        wb = load_workbook(filepath)
+        ws = wb['Dashboard']
+        
+        # --- GRÁFICO 1: BARRAS (Top Productos) ---
+        chart1 = BarChart()
+        chart1.type = "col"
+        chart1.style = 10
+        chart1.title = "Top Productos (Ingresos)"
+        chart1.y_axis.title = "$"
+        chart1.x_axis.title = "Producto"
+        
+        filas_prod = len(res_prod) + 1
+        data1 = Reference(ws, min_col=2, min_row=1, max_row=filas_prod, max_col=2)
+        cats1 = Reference(ws, min_col=1, min_row=2, max_row=filas_prod)
+        chart1.add_data(data1, titles_from_data=True)
+        chart1.set_categories(cats1)
+        chart1.width = 18
+        chart1.height = 10
+        ws.add_chart(chart1, "A20") # Ubicación: Debajo de las tablas
+
+        # --- GRÁFICO 2: TORTA (Categorías) ---
+        chart2 = PieChart()
+        chart2.title = "Ventas por Categoría"
+        
+        filas_cat = len(res_cat) + 1
+        data2 = Reference(ws, min_col=4, min_row=1, max_row=filas_cat, max_col=4)
+        cats2 = Reference(ws, min_col=3, min_row=2, max_row=filas_cat)
+        chart2.add_data(data2, titles_from_data=True)
+        chart2.set_categories(cats2)
+        ws.add_chart(chart2, "F20") 
+
+        # --- GRÁFICO 3: TORTA (Regiones) ---
+        chart3 = PieChart()
+        chart3.title = "Ventas por Región"
+        
+        filas_reg = len(res_reg) + 1
+        data3 = Reference(ws, min_col=7, min_row=1, max_row=filas_reg, max_col=7)
+        cats3 = Reference(ws, min_col=6, min_row=2, max_row=filas_reg)
+        chart3.add_data(data3, titles_from_data=True)
+        chart3.set_categories(cats3)
+        ws.add_chart(chart3, "K20")
+
+        # --- GRÁFICO 4: LÍNEA (Tendencia Diaria) ---
+        chart4 = LineChart()
+        chart4.title = "Tendencia de Ventas (Diaria)"
+        chart4.style = 12
+        chart4.y_axis.title = "$"
+        chart4.x_axis.title = "Fecha"
+        
+        filas_date = len(res_date) + 1
+        data4 = Reference(ws, min_col=10, min_row=1, max_row=filas_date, max_col=10)
+        cats4 = Reference(ws, min_col=9, min_row=2, max_row=filas_date)
+        chart4.add_data(data4, titles_from_data=True)
+        chart4.set_categories(cats4)
+        chart4.width = 30 # Más ancho para ver bien las fechas
+        chart4.height = 10
+        ws.add_chart(chart4, "A40") # Ubicación: Más abajo
+
+        wb.save(filepath)
+        return f"{base_url}static/exports/{filename}"
+
+    except Exception as e:
+        print(f"Error generando Excel Dashboard: {e}")
+        return None
+    try:
+        # --- 1. PREPARAR LA CONSULTA SQL ---
+        if es_admin:
             query = """
                 SELECT 
                     p.fecha_pedido AS 'Fecha',
@@ -168,8 +462,8 @@ def generar_excel_ventas(id_vendedor, base_url, es_admin=False):
                     p.estado AS 'Estado Pedido',
                     u.nombre AS 'Cliente',
                     u.email AS 'Email Cliente',
-                    u.region AS 'Región',
-                    pr.id_vendedor AS 'ID Vendedor' -- Extra para el admin
+                    u.region AS 'Region',
+                    pr.id_vendedor AS 'ID Vendedor'
                 FROM pedidos_productos pp
                 JOIN pedidos p ON pp.id_pedido = p.id_pedido
                 JOIN producto pr ON pp.id_producto = pr.id_producto
@@ -179,7 +473,6 @@ def generar_excel_ventas(id_vendedor, base_url, es_admin=False):
             """
             params = None
         else:
-            # Query VENDEDOR: Solo trae sus propias ventas
             query = """
                 SELECT 
                     p.fecha_pedido AS 'Fecha',
@@ -202,25 +495,67 @@ def generar_excel_ventas(id_vendedor, base_url, es_admin=False):
             """
             params = (id_vendedor,)
 
-        # Ejecutamos la consulta
+        # --- 2. OBTENER DATOS CON PANDAS ---
         df = pd.read_sql(query, db_engine, params=params)
-        
         if df.empty: return "empty"
 
-        # Nombre de archivo diferente para Admin
-        prefix = "Reporte_Global" if es_admin else f"Ventas_{id_vendedor}"
-        filename = f"{prefix}_{uuid.uuid4().hex[:8]}.xlsx"
-        filepath = os.path.join(EXPORT_DIR, filename)
+        # --- 3. GENERAR NOMBRE DE ARCHIVO LIMPIO (FECHA Y HORA) ---
+        # Formato: Año-Mes-Dia_Hora-Minuto (Ej: 2025-12-05_18-30)
+        fecha_hora = datetime.now().strftime("%Y-%m-%d_%H-%M")
         
-        df.to_excel(filepath, index=False, engine='openpyxl')
+        if es_admin:
+            filename = f"Reporte_Global_{fecha_hora}.xlsx"
+        else:
+            # Incluimos el ID del vendedor para diferenciar
+            filename = f"Ventas_Vendedor_{id_vendedor}_{fecha_hora}.xlsx"
+            
+        filepath = os.path.join(EXPORT_DIR, filename)
 
+        # --- 4. CREAR EXCEL CON HOJAS Y GRÁFICOS ---
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            # Hoja 1: Detalle completo
+            df.to_excel(writer, sheet_name='Detalle', index=False)
+            
+            # Hoja 2: Resumen para el gráfico
+            df_resumen = df.groupby('Producto')[['Total Venta', 'Cantidad']].sum().reset_index()
+            df_resumen = df_resumen.sort_values(by='Total Venta', ascending=False)
+            df_resumen.to_excel(writer, sheet_name='Resumen', index=False)
+
+        # --- 5. AGREGAR EL GRÁFICO CON OPENPYXL ---
+        wb = load_workbook(filepath)
+        ws_resumen = wb['Resumen']
+        
+        chart = BarChart()
+        chart.type = "col"
+        chart.style = 10
+        chart.title = "Total de Ventas por Producto"
+        chart.y_axis.title = "Ingresos ($)"
+        chart.x_axis.title = "Producto"
+        
+        filas = len(df_resumen) + 1
+        
+        # Datos (Columna B: Total Venta)
+        data = Reference(ws_resumen, min_col=2, min_row=1, max_row=filas, max_col=2)
+        # Categorías (Columna A: Nombres de Productos)
+        cats = Reference(ws_resumen, min_col=1, min_row=2, max_row=filas)
+        
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        chart.shape = 4
+        chart.width = 20 # Hacer el gráfico más ancho
+        chart.height = 10 # Hacer el gráfico más alto
+        
+        ws_resumen.add_chart(chart, "E2")
+        
+        wb.save(filepath)
+
+        # Devolver URL de descarga
         download_url = f"{base_url}static/exports/{filename}"
         return download_url
 
     except Exception as e:
         print(f"Error generando Excel: {e}")
         return None
-
 # //////////////////////////////////////////////////////////////////////////////
 # ///////////////             DEVOLUCION                 ///////////////////////
 # //////////////////////////////////////////////////////////////////////////////
@@ -248,7 +583,7 @@ def solicitar_devolucion_db(id_usuario):
                     "¡Claro! He verificado que tienes pedidos **entregados** que son elegibles para devolución.\n\n"
                     "Para iniciar la solicitud de forma segura (y adjuntar fotos si es necesario), "
                     "por favor ve a **Mi Cuenta > Mis Pedidos**.\n\n"
-                    "Ahí verás el botón **'Solicitar Devolución'** junto a los pedidos que aplican."
+                    "Ahí­ verás el botón **'Solicitar Devolución'** junto a los pedidos que aplican."
                 )
             }
         
@@ -319,7 +654,7 @@ def actualizar_direccion_db(id_usuario, nueva_direccion):
         cursor = conn.cursor()
         cursor.execute("UPDATE usuario SET direccion = %s WHERE id_usuario = %s", (nueva_direccion, id_usuario))
         conn.commit()
-        return "¡Listo! He actualizado tu dirección de envío principal."
+        return "¡Listo! He actualizado tu dirección de enví­o principal."
     finally:
         if conn and conn.is_connected(): conn.close()
         
@@ -379,7 +714,7 @@ def get_category_growth_analysis():
         top_category = cursor.fetchone()
         if not top_category:
             return "No hay ventas este mes para analizar."
-        return f"La categoría con mayores ingresos este mes es **{top_category['categoria'].upper()}**."
+        return f"La categorí­a con mayores ingresos este mes es **{top_category['categoria'].upper()}**."
     finally:
         if conn and conn.is_connected(): conn.close()
 
@@ -435,7 +770,7 @@ def find_product_id_by_name(product_name, id_vendedor=None):
         if conn and conn.is_connected(): conn.close()
 
 # ======================================================================
-# LÓGICA DE PREDICCIÓN (SARIMAX + PANDAS ACTUALIZADO)
+# LíGICA DE PREDICCIíN (SARIMAX + PANDAS ACTUALIZADO)
 # ======================================================================
 
 def get_prediction_data(product_id):
@@ -454,7 +789,7 @@ def get_prediction_data(product_id):
         sales_data = pd.read_sql(query, db_engine, params=(product_id,))
         
         if sales_data.empty or len(sales_data) < 15:
-            return {"success": False, "error": "Datos insuficientes para la predicción (se necesitan al menos 15 días de ventas)."}
+            return {"success": False, "error": "Datos insuficientes para la predicción (se necesitan al menos 15 dí­as de ventas)."}
 
         # Procesamiento del DataFrame
         sales_data['dia'] = pd.to_datetime(sales_data['dia'])
@@ -517,18 +852,50 @@ def chat():
     email_usuario = data.get("email_usuario", "") 
     nombre_usuario = data.get("nombre_usuario", "Invitado")
     
-    # IMPORTANTE: Captura la URL base automáticamente (http o https)
-    # base_url = request.host_url  <-- COMENTA O BORRA ESTA
+    # URL base
     base_url = "https://bitware.site:5000/"
     
     respuesta, productos_recomendados = "No te entendí.", []
     intencion = clasificar_intencion(mensaje)
 
- # --- LÓGICA PARA ADMINISTRADORES ---
+    # =================================================================
+    # 1. LÓGICA PARA ADMINISTRADORES ('A')
+    # =================================================================
     if permisos == 'A':
-        
-        # --- Lógica de predicción para Admin ---
-        if intencion == "prediccion_stock":
+        if intencion == "saludo":
+            alerts = get_proactive_alerts()
+            
+            if alerts:
+                frases_alerta = [
+                    f"Hola, Admin **{nombre_usuario}**. Atención: {alerts}",
+                    f"Bienvenido de nuevo. Tengo novedades importantes: {alerts}",
+                    f"¡Hola! Antes de empezar, revisa esto: {alerts}",
+                    f"Saludos, Jefe. Informe de situación: {alerts}",
+                    f"Alerta del sistema para **{nombre_usuario}**: {alerts}",
+                    f"Atención requerida: {alerts}",
+                    f"Reporte de urgencia: {alerts}",
+                    f"Hola. He detectado algo que requiere tu mirada: {alerts}",
+                    f"Panel de control reporta: {alerts}",
+                    f"¡Ojo al dato, Admin! {alerts}"
+                ]
+                respuesta = random.choice(frases_alerta)
+            else:
+                frases_ok = [
+                    f"Hola, Admin **{nombre_usuario}**. Todo el sistema opera al 100%.",
+                    f"¡Bienvenido, **{nombre_usuario}**! No hay alertas pendientes por ahora.",
+                    f"Saludos. La plataforma está estable y sin novedades urgentes.",
+                    f"¡Qué tal, **{nombre_usuario}**! Todo tranquilo en el servidor hoy.",
+                    f"Hola. Todo parece estar en orden. ¿Qué quieres revisar hoy?",
+                    f"Sistema nominal. Bienvenido **{nombre_usuario}**.",
+                    f"Sin novedades en el frente. ¿Vemos las estadísticas?",
+                    f"Todo en verde. ¿Exportamos algún reporte hoy?",
+                    f"Hola **{nombre_usuario}**. Base de datos y stock funcionando correctamente.",
+                    f"Día tranquilo en la oficina virtual. ¿En qué te ayudo?",
+                    f"Bienvenido. El dashboard está limpio de errores."
+                ]
+                respuesta = random.choice(frases_ok)
+
+        elif intencion == "prediccion_stock":
             match = re.search(r'(?:de|del)\s(.+)', mensaje)
             if not match: match = re.search(r'stock\s(.+)', mensaje)
             termino_busqueda = match.group(1).strip() if match else ""
@@ -549,10 +916,8 @@ def chat():
                     else:
                         respuesta = f"No pude predecir '{producto['nombre']}': {prediccion_resultado['error']}"
 
-        # --- NUEVA LÓGICA: EXPORTAR EXCEL PARA ADMIN (REPORTE GLOBAL) ---
         elif intencion == "exportar_ventas":
             respuesta = "Generando reporte GLOBAL de ventas..."
-            # Llamamos a la función con es_admin=True para obtener todo
             resultado_url = generar_excel_ventas(id_usuario, base_url, es_admin=True)
             
             if resultado_url == "empty":
@@ -561,10 +926,6 @@ def chat():
                 respuesta = f"✅ Reporte Global Generado.<br><br>👉 <a href='{resultado_url}' target='_blank' style='color: #0d6efd; font-weight: bold;'>Descargar Excel Global</a>"
             else:
                 respuesta = "Hubo un error al generar el reporte."
-
-        elif intencion == "saludo":
-            alerts = get_proactive_alerts()
-            respuesta = f"Hola, Admin **{nombre_usuario}**. {alerts if alerts else 'Todo parece estar en orden.'}"
         
         elif intencion == "stats_admin":
             if "total usuarios" in mensaje or "cuantos usuarios" in mensaje:
@@ -574,7 +935,6 @@ def chat():
                 count = cursor.fetchone()[0]
                 conn.close()
                 respuesta = f"Actualmente hay <strong>{count}</strong> usuarios registrados en total."
-            
             elif "reporte de ventas hoy" in mensaje or "ventas hoy" in mensaje:
                 conn = conectar_db()
                 cursor = conn.cursor()
@@ -583,7 +943,6 @@ def chat():
                 total_hoy = cursor.fetchone()[0] or 0
                 conn.close()
                 respuesta = f"Los ingresos totales de hoy (pedidos pagados) son: <strong>${total_hoy:,.0f}</strong>."
-            
             else:
                 stats = obtener_estadisticas_admin()
                 if stats:
@@ -628,35 +987,40 @@ def chat():
                 "* **'Actualiza pedido [ID] a [estado]'**: Cambia estado (Ej: 'pedido 105 a Enviado').\n"
                 "* **'Predice stock de [producto]'**: Pronóstico de demanda."
             )
-        
         else:
             respuesta = "No entendí ese comando de Admin. Escribe 'ayuda' para ver las opciones."
 
-  # --- LÓGICA PARA VENDEDORES ---
+    # =================================================================
+    # 2. LÓGICA PARA VENDEDORES ('V')
+    # =================================================================
     elif permisos == 'V':
-        
-        if intencion == "prediccion_stock":
-            # 1. Lista de palabras clave que queremos IGNORAR
-            palabras_a_quitar = [
-                "predice stock de", 
-                "predice el stock de", 
-                "predice stock", 
-                "predicción de", 
-                "demanda de", 
-                "pronostica"
+        if intencion == "saludo":
+            frases_vendedor = [
+                f"¡Hola, Vendedor **{nombre_usuario}**! ¿Listo para vender más hoy?",
+                f"Bienvenido a tu panel, **{nombre_usuario}**. ¿Quieres ver tus métricas o productos?",
+                f"¡Saludos! Tu tienda está activa. ¿Necesitas un reporte de ventas?",
+                f"Hola **{nombre_usuario}**. ¿En qué puedo ayudarte con tu inventario hoy?",
+                f"¡Qué bueno verte, **{nombre_usuario}**! Recuerda revisar tu stock si tienes dudas.",
+                f"¡A por todas hoy, **{nombre_usuario}**! ¿Revisamos cómo van tus ingresos?",
+                f"Hola. Tus productos están visibles para los clientes. ¿Quieres destacar alguno?",
+                f"Bienvenido. ¿Hacemos una predicción de stock para algún producto?",
+                f"Saludos emprendedor. ¿Exportamos tu Excel de ventas?",
+                f"¡Éxito en las ventas de hoy! Estoy aquí si necesitas datos.",
+                f"Hola **{nombre_usuario}**. ¿Consultamos el rendimiento de tu catálogo?"
             ]
-            
-            # 2. Limpiamos el mensaje
+            respuesta = random.choice(frases_vendedor)
+        
+        elif intencion == "prediccion_stock":
+            palabras_a_quitar = ["predice stock de", "predice el stock de", "predice stock", "predicción de", "demanda de", "pronostica"]
             termino_busqueda = mensaje
             for frase in palabras_a_quitar:
                 if termino_busqueda.startswith(frase):
                     termino_busqueda = termino_busqueda[len(frase):].strip() 
                     break
             
-            # 3. Si el término está vacío, pedimos ayuda
             if not termino_busqueda:
                 respuesta = "Claro, dime el nombre de tu producto que quieres predecir. Ej: 'Predice el stock de AdoLuche'"
-            else: # Si tenemos un término, procedemos
+            else: 
                 producto = find_product_id_by_name(termino_busqueda, id_vendedor=id_usuario) 
                 if not producto:
                     respuesta = f"No encontré el producto '{termino_busqueda}' en tu inventario."
@@ -670,7 +1034,6 @@ def chat():
                     else:
                         respuesta = f"No pude predecir '{producto['nombre']}': {prediccion_resultado['error']}"
         
-        # --- NUEVA INTENCIÓN DE EXPORTAR EXCEL ---
         elif intencion == "exportar_ventas":
             respuesta = "Generando tu reporte de ventas seguro, dame un momento..."
             resultado_url = generar_excel_ventas(id_usuario, base_url)
@@ -682,12 +1045,8 @@ def chat():
             else:
                 respuesta = "Hubo un error interno al generar el archivo. Por favor intenta más tarde."
 
-        elif intencion == "saludo":
-            respuesta = f"¡Hola, Vendedor **{nombre_usuario}**! ¿Quieres ver tus **productos**, **ventas** o **exportar un reporte**?"
-        
         elif intencion == "stats_admin" or intencion == "stock_admin" or "productos" in mensaje or "ventas" in mensaje:
              conn = conectar_db()
-             # Lógica para productos/stock
              sql_prod = "SELECT COUNT(*) as num_productos, SUM(stock) as total_stock FROM producto WHERE id_vendedor = %s"
              cursor = conn.cursor(dictionary=True)
              cursor.execute(sql_prod, (id_usuario,))
@@ -695,7 +1054,6 @@ def chat():
              num_productos = result_prod.get('num_productos') or 0
              total_stock = result_prod.get('total_stock') or 0
              
-             # Lógica para ventas
              sql_ventas = "SELECT COUNT(DISTINCT p.id_pedido) as num_ventas, SUM(pp.cantidad * pp.precio_unitario) as total_revenue FROM producto pr JOIN pedidos_productos pp ON pr.id_producto = pp.id_producto JOIN pedidos p ON pp.id_pedido = p.id_pedido WHERE pr.id_vendedor = %s AND p.estado IN ('Pagado', 'Enviado', 'Entregado')"
              cursor.execute(sql_ventas, (id_usuario,))
              result_ventas = cursor.fetchone()
@@ -709,17 +1067,19 @@ def chat():
                  respuesta = f"Actualmente tienes <strong>{num_productos}</strong> productos listados, con un stock total de <strong>{total_stock}</strong> unidades."
         
         elif intencion == "funciones" or "ayuda" in mensaje:
-                    respuesta = (
-                        "**Comandos de Vendedor:**\n"
-                        "* **'Exportar ventas'**: Descarga un Excel seguro con tus transacciones.\n"
-                        "* **'Mis ventas'**: Muestra el total de ventas e ingresos.\n"
-                        "* **'Mis productos'**: Muestra tu inventario y stock.\n"
-                        "* **'Predice stock de [mi producto]'**: Pronóstico de demanda."
-                    )
+            respuesta = (
+                "**Comandos de Vendedor:**\n"
+                "* **'Exportar ventas'**: Descarga un Excel seguro con tus transacciones.\n"
+                "* **'Mis ventas'**: Muestra el total de ventas e ingresos.\n"
+                "* **'Mis productos'**: Muestra tu inventario y stock.\n"
+                "* **'Predice stock de [mi producto]'**: Pronóstico de demanda."
+            )
         else:
             respuesta = "No entendí ese comando. Escribe 'ayuda' para ver tus opciones."
 
- # --- LÓGICA PARA CLIENTES ('U' o Invitado) ---
+    # =================================================================
+    # 3. LÓGICA PARA CLIENTES / INVITADOS ('U' o None)
+    # =================================================================
     else:
         if intencion == "prediccion_stock" or intencion == "exportar_ventas":
             respuesta = "Lo siento, esa función es exclusiva para Vendedores y Administradores."
@@ -728,10 +1088,38 @@ def chat():
             respuesta = "Para esa función, primero debes **iniciar sesión** en tu cuenta."
         
         elif intencion == "saludo":
-            respuesta = f"¡Hola, **{nombre_usuario}**! ¿Cómo puedo ayudarte? Escribe **'ayuda'** si quieres ver todo lo que puedo hacer."
+            if id_usuario:
+                frases_cliente = [
+                    f"¡Hola de nuevo, **{nombre_usuario}**! ¿Buscas algo especial hoy?",
+                    f"Bienvenido a Bitware, **{nombre_usuario}**. ¿En qué te ayudo?",
+                    f"¡Qué tal, **{nombre_usuario}**! ¿Quieres revisar el estado de algún pedido?",
+                    f"Hola **{nombre_usuario}**. Estoy aquí para ayudarte a encontrar el mejor hardware.",
+                    f"Saludos. Recuerda que puedes pedirme comparar productos o ver tu historial.",
+                    f"¡Qué gusto verte! ¿Te ayudo a rastrear tu última compra?",
+                    f"Hola **{nombre_usuario}**. ¿Necesitas ayuda con alguna devolución o duda?",
+                    f"Bienvenido. ¿Buscas actualizar tu setup hoy?",
+                    f"Hola. Si necesitas cambiar tu dirección, solo dímelo.",
+                    f"Saludos **{nombre_usuario}**. ¿Vemos qué hay de nuevo en stock?",
+                    f"Aquí estoy. Pregúntame por 'mi pedido' o busca un componente."
+                ]
+                respuesta = random.choice(frases_cliente)
+            else:
+                frases_invitado = [
+                    "¡Hola! Bienvenido a Bitware. Inicia sesión para sacar el máximo provecho.",
+                    "¡Bienvenido! Soy tu asistente virtual. Escribe 'ayuda' para ver qué puedo hacer.",
+                    "Hola. ¿Buscas algún componente en específico? Puedo ayudarte a buscar.",
+                    "¡Saludos! Explora nuestro catálogo o pregúntame por horarios y métodos de pago.",
+                    "Bienvenido al futuro del hardware. ¿Te ayudo a encontrar algo?",
+                    "Hola viajero. ¿Necesitas comparar precios de componentes?",
+                    "¡Buenas! Soy el bot de Bitware. Pregúntame lo que necesites.",
+                    "Bienvenido. ¿Te interesa saber nuestros métodos de pago?",
+                    "Hola. Puedo ayudarte a cotizar o comparar productos. ¡Prueba!",
+                    "Saludos. Inicia sesión para ver tus pedidos, o pregúntame libremente.",
+                    "¡Hola! ¿Buscas soporte o ventas? Estoy para servirte."
+                ]
+                respuesta = random.choice(frases_invitado)
             
         elif intencion == "funciones" or "ayuda" in mensaje:
-            # Primero definimos las funciones básicas (para todos)
             respuesta_basica = (
                 "* **'Busca [producto]'**: Para encontrar productos (Ej: 'Busca RTX 3060').\n"
                 "* **'Compara [A] con [B]'**: Muestra una comparativa de precios (Ej: 'Compara Intel i5 con Ryzen 5').\n"
@@ -741,14 +1129,12 @@ def chat():
             )
             
             if not id_usuario:
-                # --- AYUDA PARA INVITADOS ---
                 respuesta = (
                     "**Hola, Invitado. Esto es lo que puedes hacer:**\n"
                     f"{respuesta_basica}\n"
                     "\n¡**Inicia sesión** para ver tu pedido, actualizar tu dirección y más!"
                 )
             else:
-                # --- AYUDA PARA CLIENTES (Logueados) ---
                 respuesta = (
                     f"**Hola, {nombre_usuario}. ¡Puedes pedirme todo esto!:**\n\n"
                     "**SOBRE TUS PEDIDOS:**\n"
@@ -791,10 +1177,7 @@ def chat():
             respuesta = f"Tu último pedido es el #{pedido['id_pedido']} y su estado es: **{pedido['estado']}**." if pedido else "Aún no tienes pedidos."
         
         elif intencion == "solicitar_devolucion":
-            # 1. Llamamos a nuestra nueva función de chequeo
             check = solicitar_devolucion_db(id_usuario)
-            
-            # 2. La respuesta es simplemente el mensaje que la función nos preparó
             respuesta = check["mensaje"]
         
         elif intencion == "solicitar_notificacion":

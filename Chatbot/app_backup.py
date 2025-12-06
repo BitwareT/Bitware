@@ -1,23 +1,39 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
 import random
 import re
 from datetime import datetime
+import os
+import uuid
+import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.chart import BarChart, Reference
 
-# Importaciones de Machine Learning (Chatbot)
+# --- NUEVAS IMPORTACIONES PARA ARREGLAR ERRORES Y WARNINGS ---
+from sqlalchemy import create_engine
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-
-# Importaciones de Predicción
-import pandas as pd
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import warnings
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 CORS(app)
+app.json.ensure_ascii = False
+app.config['JSON_AS_ASCII'] = False
 
-# --- CONEXIÓN A LA BASE DE DATOS ---
+# --- CONFIGURACIÓN DE DIRECTORIOS ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+EXPORT_DIR = os.path.join(BASE_DIR, 'static', 'exports')
+os.makedirs(EXPORT_DIR, exist_ok=True)
+
+# --- CONEXIÓN SQLALCHEMY (CORRIGE ERROR DE PANDAS) ---
+# Usaremos esto solo cuando usemos pandas (Predicciones y Excel)
+DB_CONNECTION_STR = 'mysql+pymysql://bitware_user:Rocky25..@localhost/bitware'
+db_engine = create_engine(DB_CONNECTION_STR)
+
+# --- CONEXIÓN CLÁSICA (Para el resto del sistema) ---
 def conectar_db():
     try:
         return mysql.connector.connect(host="localhost", user="bitware_user", password="Rocky25..", database="bitware")
@@ -57,16 +73,18 @@ analisis_frases = ["análisis", "analisis", "análisis de crecimiento", "qué ca
 prediccion_frases = ["predice el stock", "predicción de", "pronostica", "cuánto se venderá de", "demanda de", "predecir stock"]
 
 # ---- Intenciones Invitados ----
-
 horarios_frases = ["horarios de atención", "cuál es su horario", "a qué hora abren", "atienden los sábados", "horario"]
 pagos_frases = ["métodos de pago", "cómo puedo pagar", "aceptan tarjeta", "se puede pagar con transferencia", "formas de pago"]
 
-# Combinamos todas las frases e intenciones para el entrenamiento
+# ---- Intenciones Vendedor (NUEVO) ----
+exportar_frases = ["exportar ventas", "descargar ventas", "dame un excel con mis ventas", "generar excel", "ventas en excel", "reporte excel"]
+
+# Combinamos todas las frases e intenciones
 frases = (saludos + productos_frases + pedidos_frases + soportes_frases + funciones_frases + busqueda_frases +
           devolucion_frases + notificacion_stock_frases + comparar_frases + actualizar_direccion_frases +
           horarios_frases + pagos_frases +
           stats_admin_frases + stock_admin_frases + buscar_cliente_frases + cambiar_estado_pedido_frases + analisis_frases +
-          prediccion_frases)
+          prediccion_frases + exportar_frases)
 
 intenciones = (
     ["saludo"] * len(saludos) + ["producto"] * len(productos_frases) + ["pedido"] * len(pedidos_frases) +
@@ -77,7 +95,8 @@ intenciones = (
     ["stats_admin"] * len(stats_admin_frases) + ["stock_admin"] * len(stock_admin_frases) +
     ["buscar_cliente_admin"] * len(buscar_cliente_frases) + ["cambiar_estado_pedido"] * len(cambiar_estado_pedido_frases) +
     ["analisis_admin"] * len(analisis_frases) +
-    ["prediccion_stock"] * len(prediccion_frases)
+    ["prediccion_stock"] * len(prediccion_frases) +
+    ["exportar_ventas"] * len(exportar_frases)
 )
 
 vectorizer = CountVectorizer()
@@ -138,23 +157,126 @@ def buscar_productos_por_nombre(termino_busqueda):
         if conn and conn.is_connected():
             conn.close()
 
+# --- NUEVA FUNCIÓN: EXCEL (USANDO SQLALCHEMY) ---
+def generar_excel_ventas(id_vendedor, base_url, es_admin=False):
+    try:
+        # --- 1. PREPARAR LA CONSULTA SQL ---
+        if es_admin:
+            query = """
+                SELECT 
+                    p.fecha_pedido AS 'Fecha',
+                    p.id_pedido AS 'ID Pedido',
+                    pr.nombre AS 'Producto',
+                    pp.cantidad AS 'Cantidad',
+                    pp.precio_unitario AS 'Precio Unitario',
+                    (pp.cantidad * pp.precio_unitario) AS 'Total Venta',
+                    p.estado AS 'Estado Pedido',
+                    u.nombre AS 'Cliente',
+                    u.email AS 'Email Cliente',
+                    u.region AS 'Region',
+                    pr.id_vendedor AS 'ID Vendedor'
+                FROM pedidos_productos pp
+                JOIN pedidos p ON pp.id_pedido = p.id_pedido
+                JOIN producto pr ON pp.id_producto = pr.id_producto
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE p.estado IN ('Pagado', 'Enviado', 'Entregado')
+                ORDER BY p.fecha_pedido DESC
+            """
+            params = None
+        else:
+            query = """
+                SELECT 
+                    p.fecha_pedido AS 'Fecha',
+                    p.id_pedido AS 'ID Pedido',
+                    pr.nombre AS 'Producto',
+                    pp.cantidad AS 'Cantidad',
+                    pp.precio_unitario AS 'Precio Unitario',
+                    (pp.cantidad * pp.precio_unitario) AS 'Total Venta',
+                    p.estado AS 'Estado Pedido',
+                    u.nombre AS 'Cliente',
+                    u.email AS 'Email Cliente',
+                    u.region AS 'Regi�n'
+                FROM pedidos_productos pp
+                JOIN pedidos p ON pp.id_pedido = p.id_pedido
+                JOIN producto pr ON pp.id_producto = pr.id_producto
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE pr.id_vendedor = %s
+                  AND p.estado IN ('Pagado', 'Enviado', 'Entregado')
+                ORDER BY p.fecha_pedido DESC
+            """
+            params = (id_vendedor,)
+
+        # --- 2. OBTENER DATOS CON PANDAS ---
+        df = pd.read_sql(query, db_engine, params=params)
+        if df.empty: return "empty"
+
+        # --- 3. GENERAR NOMBRE DE ARCHIVO LIMPIO (FECHA Y HORA) ---
+        # Formato: A�o-Mes-Dia_Hora-Minuto (Ej: 2025-12-05_18-30)
+        fecha_hora = datetime.now().strftime("%Y-%m-%d_%H-%M")
+        
+        if es_admin:
+            filename = f"Reporte_Global_{fecha_hora}.xlsx"
+        else:
+            # Incluimos el ID del vendedor para diferenciar
+            filename = f"Ventas_Vendedor_{id_vendedor}_{fecha_hora}.xlsx"
+            
+        filepath = os.path.join(EXPORT_DIR, filename)
+
+        # --- 4. CREAR EXCEL CON HOJAS Y GR�FICOS ---
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            # Hoja 1: Detalle completo
+            df.to_excel(writer, sheet_name='Detalle', index=False)
+            
+            # Hoja 2: Resumen para el gr�fico
+            df_resumen = df.groupby('Producto')[['Total Venta', 'Cantidad']].sum().reset_index()
+            df_resumen = df_resumen.sort_values(by='Total Venta', ascending=False)
+            df_resumen.to_excel(writer, sheet_name='Resumen', index=False)
+
+        # --- 5. AGREGAR EL GR�FICO CON OPENPYXL ---
+        wb = load_workbook(filepath)
+        ws_resumen = wb['Resumen']
+        
+        chart = BarChart()
+        chart.type = "col"
+        chart.style = 10
+        chart.title = "Total de Ventas por Producto"
+        chart.y_axis.title = "Ingresos ($)"
+        chart.x_axis.title = "Producto"
+        
+        filas = len(df_resumen) + 1
+        
+        # Datos (Columna B: Total Venta)
+        data = Reference(ws_resumen, min_col=2, min_row=1, max_row=filas, max_col=2)
+        # Categor�as (Columna A: Nombres de Productos)
+        cats = Reference(ws_resumen, min_col=1, min_row=2, max_row=filas)
+        
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        chart.shape = 4
+        chart.width = 20 # Hacer el gr�fico m�s ancho
+        chart.height = 10 # Hacer el gr�fico m�s alto
+        
+        ws_resumen.add_chart(chart, "E2")
+        
+        wb.save(filepath)
+
+        # Devolver URL de descarga
+        download_url = f"{base_url}static/exports/{filename}"
+        return download_url
+
+    except Exception as e:
+        print(f"Error generando Excel: {e}")
+        return None
 # //////////////////////////////////////////////////////////////////////////////
 # ///////////////             DEVOLUCION                 ///////////////////////
 # //////////////////////////////////////////////////////////////////////////////
 
-
 def solicitar_devolucion_db(id_usuario):
-    """
-    Verifica si un usuario es elegible para una devolución.
-    (El usuario debe tener al menos un pedido 'Entregado' o 'Completado').
-    """
     conn = conectar_db()
     if not conn: 
         return {"elegible": False, "mensaje": "No pude conectarme a la base de datos para verificar tus pedidos."}
     try:
         cursor = conn.cursor(dictionary=True)
-        
-        # 1. Buscamos si tiene algún pedido 'Entregado' o 'Completado'
         query_elegible = """
             SELECT id_pedido
             FROM pedidos 
@@ -166,7 +288,6 @@ def solicitar_devolucion_db(id_usuario):
         pedido_elegible = cursor.fetchone()
         
         if pedido_elegible:
-            # ¡Sí! El usuario tiene al menos un pedido entregado.
             return {
                 "elegible": True, 
                 "mensaje": (
@@ -177,19 +298,16 @@ def solicitar_devolucion_db(id_usuario):
                 )
             }
         
-        # 2. Si no es elegible, veamos por qué. ¿Tiene pedidos en otro estado?
         query_otros = "SELECT estado FROM pedidos WHERE id_usuario = %s ORDER BY fecha_pedido DESC LIMIT 1"
         cursor.execute(query_otros, (id_usuario,))
         ultimo_pedido = cursor.fetchone()
         
         if ultimo_pedido:
-            # Tiene pedidos, pero ninguno 'Entregado'
             return {
                 "elegible": False, 
                 "mensaje": f"Revisé tu cuenta y veo que tu último pedido está en estado **'{ultimo_pedido['estado']}'**. \n\nSolo puedes iniciar una devolución **después de que el pedido haya sido 'Entregado'**."
             }
         else:
-            # No tiene ningún pedido
             return {
                 "elegible": False, 
                 "mensaje": "Revisé tu cuenta, pero no encontré ningún pedido registrado."
@@ -363,14 +481,12 @@ def find_product_id_by_name(product_name, id_vendedor=None):
         if conn and conn.is_connected(): conn.close()
 
 # ======================================================================
-# LÓGICA DE PREDICCIÓN
+# LÓGICA DE PREDICCIÓN (SARIMAX + PANDAS ACTUALIZADO)
 # ======================================================================
 
-def get_sales_history(product_id):
-    conn = conectar_db()
-    if not conn: return None
+def get_prediction_data(product_id):
     try:
-        cursor = conn.cursor(dictionary=True)
+        # Usamos db_engine y read_sql normal para evitar warning
         query = """
             SELECT DATE(p.fecha_pedido) as dia, SUM(pp.cantidad) as total_vendido
             FROM pedidos p
@@ -381,36 +497,22 @@ def get_sales_history(product_id):
             GROUP BY DATE(p.fecha_pedido)
             ORDER BY dia ASC;
         """
-        cursor.execute(query, (product_id,))
-        historial = cursor.fetchall()
+        sales_data = pd.read_sql(query, db_engine, params=(product_id,))
         
-        if not historial: return None
-
-        df = pd.DataFrame(historial)
-        df['dia'] = pd.to_datetime(df['dia'])
-        df = df.set_index('dia')
-        df['total_vendido'] = pd.to_numeric(df['total_vendido'])
-        df = df.resample('D').sum().fillna(0).astype(float)
-        
-        return df['total_vendido']
-    except Exception as e:
-        print(f"Error en get_sales_history: {e}")
-        return None
-    finally:
-        if conn and conn.is_connected(): conn.close()
-
-def get_prediction_data(product_id):
-    try:
-        sales_data = get_sales_history(product_id)
-        
-        if sales_data is None or len(sales_data) < 15:
+        if sales_data.empty or len(sales_data) < 15:
             return {"success": False, "error": "Datos insuficientes para la predicción (se necesitan al menos 15 días de ventas)."}
 
+        # Procesamiento del DataFrame
+        sales_data['dia'] = pd.to_datetime(sales_data['dia'])
+        sales_data = sales_data.set_index('dia')
+        sales_data['total_vendido'] = pd.to_numeric(sales_data['total_vendido'])
+        df_resampled = sales_data.resample('D').sum().fillna(0).astype(float)
+        
         order = (1, 1, 1)
         seasonal_order = (1, 1, 1, 7)
         warnings.filterwarnings("ignore") 
         
-        model = SARIMAX(sales_data,
+        model = SARIMAX(df_resampled['total_vendido'],
                         order=order,
                         seasonal_order=seasonal_order,
                         enforce_stationarity=False,
@@ -419,7 +521,7 @@ def get_prediction_data(product_id):
         model_fit = model.fit(disp=False) 
         forecast = model_fit.forecast(steps=30)
         
-        forecast_dates = pd.date_range(start=sales_data.index.max() + pd.Timedelta(days=1), periods=30).strftime('%Y-%m-%d').tolist()
+        forecast_dates = pd.date_range(start=df_resampled.index.max() + pd.Timedelta(days=1), periods=30).strftime('%Y-%m-%d').tolist()
         forecast_values = [round(val) if val > 0 else 0 for val in forecast.tolist()]
 
         return {
@@ -460,11 +562,15 @@ def chat():
     id_usuario = data.get("userId")
     email_usuario = data.get("email_usuario", "") 
     nombre_usuario = data.get("nombre_usuario", "Invitado")
+    
+    # IMPORTANTE: Captura la URL base automáticamente (http o https)
+    # base_url = request.host_url  <-- COMENTA O BORRA ESTA
+    base_url = "https://bitware.site:5000/"
+    
     respuesta, productos_recomendados = "No te entendí.", []
-
     intencion = clasificar_intencion(mensaje)
 
-    # --- LÓGICA PARA ADMINISTRADORES ---
+ # --- LÓGICA PARA ADMINISTRADORES ---
     if permisos == 'A':
         
         # --- Lógica de predicción para Admin ---
@@ -489,11 +595,23 @@ def chat():
                     else:
                         respuesta = f"No pude predecir '{producto['nombre']}': {prediccion_resultado['error']}"
 
+        # --- NUEVA LÓGICA: EXPORTAR EXCEL PARA ADMIN (REPORTE GLOBAL) ---
+        elif intencion == "exportar_ventas":
+            respuesta = "Generando reporte GLOBAL de ventas..."
+            # Llamamos a la función con es_admin=True para obtener todo
+            resultado_url = generar_excel_ventas(id_usuario, base_url, es_admin=True)
+            
+            if resultado_url == "empty":
+                respuesta = "No encontré ventas registradas en el sistema."
+            elif resultado_url:
+                respuesta = f"✅ Reporte Global Generado.<br><br>👉 <a href='{resultado_url}' target='_blank' style='color: #0d6efd; font-weight: bold;'>Descargar Excel Global</a>"
+            else:
+                respuesta = "Hubo un error al generar el reporte."
+
         elif intencion == "saludo":
             alerts = get_proactive_alerts()
             respuesta = f"Hola, Admin **{nombre_usuario}**. {alerts if alerts else 'Todo parece estar en orden.'}"
         
-        # --- LÓGICA CORREGIDA PARA STATS_ADMIN ---
         elif intencion == "stats_admin":
             if "total usuarios" in mensaje or "cuantos usuarios" in mensaje:
                 conn = conectar_db()
@@ -548,12 +666,13 @@ def chat():
         elif intencion == "funciones" or "ayuda" in mensaje:
             respuesta = (
                 "**Comandos de Administrador:**\n"
-                "* **'Estadísticas'** o **'Resumen'**: Muestra el resumen rápido del sistema.\n"
+                "* **'Exportar ventas'**: Descarga un reporte global de todas las ventas.\n"
+                "* **'Estadísticas'**: Muestra el resumen rápido del sistema.\n"
                 "* **'Total usuarios'**: Muestra el conteo total de usuarios registrados.\n"
-                "* **'Reporte de ventas hoy'**: Calcula los ingresos de pedidos pagados del día.\n"
-                "* **'Busca al cliente [email o nombre]'**: Encuentra un cliente y muestra su información.\n"
-                "* **'Actualiza el pedido [ID] a [estado]'**: Cambia el estado de un pedido (Ej: '...pedido 105 a Enviado').\n"
-                "* **'Predice stock de [producto]'**: Realiza un pronóstico de demanda a 30 días."
+                "* **'Reporte de ventas hoy'**: Calcula los ingresos del día.\n"
+                "* **'Busca al cliente [dato]'**: Encuentra información de un cliente.\n"
+                "* **'Actualiza pedido [ID] a [estado]'**: Cambia estado (Ej: 'pedido 105 a Enviado').\n"
+                "* **'Predice stock de [producto]'**: Pronóstico de demanda."
             )
         
         else:
@@ -597,10 +716,20 @@ def chat():
                     else:
                         respuesta = f"No pude predecir '{producto['nombre']}': {prediccion_resultado['error']}"
         
-        # ... (Aquí sigue el resto de La Lógica para 'elif intencion == "saludo":', etc.) ...
+        # --- NUEVA INTENCIÓN DE EXPORTAR EXCEL ---
+        elif intencion == "exportar_ventas":
+            respuesta = "Generando tu reporte de ventas seguro, dame un momento..."
+            resultado_url = generar_excel_ventas(id_usuario, base_url)
+            
+            if resultado_url == "empty":
+                respuesta = "Revisé tus registros y no encontré ventas pagadas o finalizadas para exportar."
+            elif resultado_url:
+                respuesta = f"¡Listo! He generado tu archivo Excel.<br><br><a href='{resultado_url}' target='_blank' style='color: #0d6efd; font-weight: bold;'>Descargar Reporte</a>"
+            else:
+                respuesta = "Hubo un error interno al generar el archivo. Por favor intenta más tarde."
 
         elif intencion == "saludo":
-            respuesta = f"¡Hola, Vendedor **{nombre_usuario}**! ¿Quieres ver tus **productos** o tus **ventas**?"
+            respuesta = f"¡Hola, Vendedor **{nombre_usuario}**! ¿Quieres ver tus **productos**, **ventas** o **exportar un reporte**?"
         
         elif intencion == "stats_admin" or intencion == "stock_admin" or "productos" in mensaje or "ventas" in mensaje:
              conn = conectar_db()
@@ -628,17 +757,18 @@ def chat():
         elif intencion == "funciones" or "ayuda" in mensaje:
                     respuesta = (
                         "**Comandos de Vendedor:**\n"
-                        "* **'Mis ventas'**: Muestra el total de ventas y ingresos generados por tus productos.\n"
-                        "* **'Mis productos'** o **'Mi stock'**: Muestra cuántos productos tienes listados y el stock total.\n"
-                        "* **'Predice stock de [mi producto]'**: Realiza un pronóstico de demanda para uno de tus productos."
+                        "* **'Exportar ventas'**: Descarga un Excel seguro con tus transacciones.\n"
+                        "* **'Mis ventas'**: Muestra el total de ventas e ingresos.\n"
+                        "* **'Mis productos'**: Muestra tu inventario y stock.\n"
+                        "* **'Predice stock de [mi producto]'**: Pronóstico de demanda."
                     )
         else:
             respuesta = "No entendí ese comando. Escribe 'ayuda' para ver tus opciones."
 
  # --- LÓGICA PARA CLIENTES ('U' o Invitado) ---
     else:
-        if intencion == "prediccion_stock":
-            respuesta = "Lo siento, la predicción de demanda solo está disponible para Vendedores y Administradores."
+        if intencion == "prediccion_stock" or intencion == "exportar_ventas":
+            respuesta = "Lo siento, esa función es exclusiva para Vendedores y Administradores."
             
         elif not id_usuario and intencion in ["pedido", "solicitar_devolucion", "solicitar_notificacion", "actualizar_direccion"]:
             respuesta = "Para esa función, primero debes **iniciar sesión** en tu cuenta."
@@ -747,4 +877,15 @@ def chat():
     return jsonify({"respuesta": respuesta, "productos": productos_recomendados})
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    # --- CONFIGURACIÓN SSL (HTTPS) AUTOMÁTICA ---
+    cert_path = '/etc/letsencrypt/live/bitware.site/fullchain.pem'
+    key_path = '/etc/letsencrypt/live/bitware.site/privkey.pem'
+
+    if os.path.exists(cert_path) and os.path.exists(key_path):
+        print("✅ MODO SEGURO: Certificados SSL encontrados. Iniciando HTTPS...")
+        # Contexto SSL para que Flask sirva en https://bitware.site:5000
+        context = (cert_path, key_path)
+        app.run(host='0.0.0.0', port=5000, ssl_context=context, debug=True)
+    else:
+        print("⚠️ MODO INSEGURO: Certificados no encontrados. Iniciando HTTP simple.")
+        app.run(host='0.0.0.0', port=5000, debug=True)
